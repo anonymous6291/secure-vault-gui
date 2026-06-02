@@ -41,7 +41,7 @@ public class Main {
 
             @Override
             public Dimension getDisplayDimension() {
-                return new Dimension(width, height);
+                return new Dimension(width - 1, height);
             }
 
             @Override
@@ -66,10 +66,13 @@ public class Main {
         });
         String[] files = new String[]{"A", "B", "C"};
         directoryManager.addFile(files, 0, files.length);
+        files = new String[]{"F", "B", "C"};
+        directoryManager.addFile(files, 0, files.length);
         files = new String[]{"B"};
         directoryManager.addFile(files, 0, files.length);
         for (int i = 0; i < 200; i++) {
-            directoryManager.addFile(new String[]{Integer.toString(i)}, 0, 1);
+            String[] d = new String[]{i+".java"};
+            directoryManager.addFile(d, 0, d.length);
         }
         directoryManager.display();
         //JPanel glass = getPanel();

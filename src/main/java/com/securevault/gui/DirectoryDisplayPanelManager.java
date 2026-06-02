@@ -3,6 +3,8 @@ package com.securevault.gui;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class DirectoryDisplayPanelManager {
     private static final int TOP_MENU_HEIGHT = 50;
@@ -27,27 +29,29 @@ public class DirectoryDisplayPanelManager {
 
     private static JComponent getFilesView(DirectoryManager directoryManager, Dimension dimension) {
         Map<String, FileIconView> fileIconViewMap = directoryManager.getFileIconViewMap();
-        JPanel jPanel = new JPanel(new FlowLayout(FlowLayout.LEFT)) {
+        JPanel jPanel = new JPanel(new WrapLayout(FlowLayout.LEFT, 20,20)) {
             @Override
             public Dimension getPreferredSize() {
-                Dimension d = super.getPreferredSize();
-                return new Dimension(dimension.width, d.height);
+                Dimension dimension1 = super.getPreferredSize();
+                return new Dimension(dimension.width, dimension1.height);
             }
         };
+        TreeMap<String, DirectoryManager> directories = directoryManager.getDirectories();
+        TreeSet<String> files = directoryManager.getFiles();
         jPanel.setOpaque(false);
-        jPanel.setBackground(Color.YELLOW);
-        jPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-        JScrollPane jScrollPane = new JScrollPane(jPanel);
-        jScrollPane.setOpaque(false);
-        jScrollPane.setBackground(Color.ORANGE);
-        jScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        jScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
-        for (String directoryName : directoryManager.getDirectories().keySet()) {
+        jPanel.setDoubleBuffered(true);
+        for (String directoryName : directories.keySet()) {
             jPanel.add(fileIconViewMap.get(directoryName).getDisplayableComponent());
         }
-        for (String fileName : directoryManager.getFiles()) {
+        for (String fileName : files) {
             jPanel.add(fileIconViewMap.get(fileName).getDisplayableComponent());
         }
+        JScrollPane jScrollPane = new JScrollPane(jPanel);
+        jScrollPane.getViewport().setOpaque(false);
+        jScrollPane.setOpaque(false);
+        jScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        jScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        jScrollPane.getVerticalScrollBar().setUnitIncrement(10);
         return jScrollPane;
     }
 }

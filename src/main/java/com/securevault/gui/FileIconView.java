@@ -9,7 +9,7 @@ import java.awt.event.MouseEvent;
 
 public class FileIconView extends MouseAdapter {
     private static final int FILE_NAME_WIDTH = Constants.ICON_WIDTH;
-    private static final int FILE_NAME_HEIGHT = 10;
+    private static final int FILE_NAME_HEIGHT = 15;
     private static final int FILE_ICON_WIDTH = Constants.ICON_WIDTH;
     private static final int FILE_ICON_HEIGHT = Constants.ICON_HEIGHT - FILE_NAME_HEIGHT;
     private final JPanel jPanel;
@@ -24,25 +24,34 @@ public class FileIconView extends MouseAdapter {
         this.fileIconViewEventListener = fileIconViewEventListener;
         Image icon;
         if (directory) {
-            icon = IconManager.getDirectoryIcon().getScaledInstance(FILE_ICON_WIDTH, FILE_ICON_HEIGHT, Image.SCALE_SMOOTH);
+            icon = IconManager.getDirectoryIcon();
+            if (icon != null) {
+                icon = icon.getScaledInstance(FILE_ICON_WIDTH, FILE_ICON_HEIGHT, Image.SCALE_SMOOTH);
+            }
         } else {
-            icon = IconManager.getFileIcon(fileName).getScaledInstance(FILE_ICON_WIDTH, FILE_ICON_HEIGHT, Image.SCALE_SMOOTH);
+            icon = IconManager.getFileIcon(fileName);
+            if (icon != null) {
+                icon = icon.getScaledInstance(FILE_ICON_WIDTH, FILE_ICON_HEIGHT, Image.SCALE_SMOOTH);
+            }
         }
+        Image imageIcon = icon;
         jPanel = new JPanel(new BorderLayout());
-        JPanel iconPanel = new JPanel(){
+        jPanel.setOpaque(false);
+        JPanel iconPanel = new JPanel() {
             @Override
             public void paint(Graphics g) {
                 super.paintComponents(g);
-                g.drawImage(icon, 0, 0, this);
+                g.drawImage(imageIcon, 0, 0, this);
             }
         };
         JLabel fileNameLabel = new JLabel(fileName);
+        fileNameLabel.setForeground(Constants.FILE_NAME_COLOR);
         fileNameLabel.setPreferredSize(new Dimension(FILE_NAME_WIDTH, FILE_NAME_HEIGHT));
         fileNameLabel.setVerticalAlignment(JLabel.CENTER);
         fileNameLabel.setHorizontalAlignment(JLabel.CENTER);
         jPanel.setPreferredSize(new Dimension(Constants.ICON_WIDTH, Constants.ICON_HEIGHT));
-        jPanel.add(iconPanel,BorderLayout.CENTER);
-        jPanel.add(fileNameLabel,BorderLayout.SOUTH);
+        jPanel.add(iconPanel, BorderLayout.CENTER);
+        jPanel.add(fileNameLabel, BorderLayout.SOUTH);
         jPanel.addMouseListener(this);
     }
 
@@ -71,12 +80,3 @@ public class FileIconView extends MouseAdapter {
         fileIconViewEventListener.click(fileName, mouseEvent);
     }
 }
-/*
-{
-            @Override
-            public void paint(Graphics g) {
-                super.paintComponents(g);
-                g.drawImage(icon, 0, 0, this);
-            }
-        }
- */
