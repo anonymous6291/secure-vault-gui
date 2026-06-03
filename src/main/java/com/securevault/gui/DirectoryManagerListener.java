@@ -7,6 +7,8 @@ import java.nio.file.Path;
 public interface DirectoryManagerListener {
     void displayDirectory(JPanel jPanel);
 
+    DirectoryManager getDirectoryManager(Path path);
+
     Dimension getDisplayDimension();
 
     void refreshUI();

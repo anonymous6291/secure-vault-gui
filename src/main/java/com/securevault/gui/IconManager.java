@@ -1,40 +1,27 @@
 package com.securevault.gui;
 
-import javax.swing.*;
-import java.awt.*;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 
 public class IconManager {
-    private static final ClassLoader classLoader = IconManager.class.getClassLoader();
 
-    public static Image getDirectoryIcon() {
-        URL url = classLoader.getResource("other_icons/folder.png");
-        if (url == null) {
-            return null;
-        }
-        return new ImageIcon(url).getImage();
+    public static URL getDirectoryIconURL() {
+        return ResourceManager.getResource("other_icons/folder.png");
     }
 
-    public static Image getUnknownFileIcon() {
-        URL url = classLoader.getResource("other_icons/unknown_file.png");
-        if (url == null) {
-            return null;
-        }
-        return new ImageIcon(url).getImage();
+    public static URL getUnknownFileIconURL() {
+        return ResourceManager.getResource("other_icons/unknown_file.png");
     }
 
-    public static Image getFileIcon(String fileName) {
+    public static URL getFileIconURL(String fileName) {
         int dotIndex = fileName.lastIndexOf(".");
         if (dotIndex == -1) {
-            return getUnknownFileIcon();
+            return getUnknownFileIconURL();
         }
         String extension = fileName.substring(dotIndex + 1);
-        URL url = classLoader.getResource("file_icons/" + extension + ".png");
+        URL url = ResourceManager.getResource("file_icons/" + extension + ".png");
         if (url == null) {
-            return getUnknownFileIcon();
+            return getUnknownFileIconURL();
         }
-        return new ImageIcon(url).getImage();
+        return url;
     }
 }

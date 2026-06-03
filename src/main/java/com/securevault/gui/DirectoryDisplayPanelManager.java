@@ -2,12 +2,18 @@ package com.securevault.gui;
 
 import javax.swing.*;
 import java.awt.*;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
 public class DirectoryDisplayPanelManager {
+    private static final String BACK_BUTTON_ICON = "other_icons/back_button.png";
+    private static final int BACK_BUTTON_WIDTH = 50;
+    private static final int BACK_BUTTON_HEIGHT = 50;
     private static final int TOP_MENU_HEIGHT = 50;
+    private static final int PATH_TEXT_AREA_WIDTH = 300;
+    private static final int PATH_TEXT_AREA_HEIGHT = 30;
 
     public static JPanel getDirectoryDisplayPanel(DirectoryManager directoryManager) {
         JPanel jPanel = new JPanel(new BorderLayout());
@@ -20,16 +26,45 @@ public class DirectoryDisplayPanelManager {
     }
 
     private static JComponent getTopView(DirectoryManager directoryManager, Dimension dimension) {
-        JPanel jPanel = new JPanel();
+        JPanel jPanel = new JPanel(new BorderLayout());
         jPanel.setOpaque(false);
-        jPanel.setBackground(Color.CYAN);
         jPanel.setPreferredSize(new Dimension(dimension.width, TOP_MENU_HEIGHT));
+        Icon backIcon = new ImageIcon(new ImageIcon(ResourceManager.getResource(BACK_BUTTON_ICON)).getImage().getScaledInstance(BACK_BUTTON_WIDTH, BACK_BUTTON_HEIGHT, Image.SCALE_SMOOTH));
+        JButton backButton = new JButton("", backIcon);
+        backButton.setPreferredSize(new Dimension(BACK_BUTTON_WIDTH, BACK_BUTTON_HEIGHT));
+        backButton.addActionListener(_ -> {
+            DirectoryManager parentDirectoryManager = directoryManager.getParentDirectoryManager();
+            if (parentDirectoryManager != null) {
+                parentDirectoryManager.display();
+            }
+        });
+        backButton.setFocusPainted(false);
+        JPanel pathFieldHolder = new JPanel();
+        pathFieldHolder.setOpaque(false);
+        JTextField pathField = new JTextField(directoryManager.getPath().toString());
+        pathField.setPreferredSize(new Dimension(PATH_TEXT_AREA_WIDTH, PATH_TEXT_AREA_HEIGHT));
+        pathField.setFont(Constants.PATH_FIELD_FONT);
+        pathField.setBackground(Constants.PATH_FIELD_BACKGROUND);
+        pathField.setForeground(Constants.PATH_FIELD_FOREGROUND);
+        pathField.addActionListener(_ -> {
+            try {
+                DirectoryManager targetDirectoryManager = directoryManager.getDirectorManager(Path.of(pathField.getText()));
+                if (targetDirectoryManager != null) {
+                    targetDirectoryManager.display();
+                }
+            } catch (Exception e) {
+                IO.println(e);
+            }
+        });
+        pathFieldHolder.add(pathField);
+        jPanel.add(backButton, BorderLayout.WEST);
+        jPanel.add(pathFieldHolder, BorderLayout.CENTER);
         return jPanel;
     }
 
     private static JComponent getFilesView(DirectoryManager directoryManager, Dimension dimension) {
         Map<String, FileIconView> fileIconViewMap = directoryManager.getFileIconViewMap();
-        JPanel jPanel = new JPanel(new WrapLayout(FlowLayout.LEFT, 20,20)) {
+        JPanel jPanel = new JPanel(new WrapLayout(FlowLayout.LEFT, 20, 20)) {
             @Override
             public Dimension getPreferredSize() {
                 Dimension dimension1 = super.getPreferredSize();

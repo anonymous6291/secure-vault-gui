@@ -15,7 +15,7 @@ public class DirectoryManager implements FileIconViewEventListener {
     private final TreeSet<String> files = new TreeSet<>();
     private final Map<String, FileIconView> fileIconViewMap = new HashMap<>();
     private final Path path;
-    private final String name;
+    private final String directoryName;
     private final DirectoryManager parentDirectoryManager;
     private final DirectoryManagerListener directoryManagerListener;
     private final Semaphore lock = new Semaphore(1, true);
@@ -25,12 +25,25 @@ public class DirectoryManager implements FileIconViewEventListener {
         this.path = path;
         this.parentDirectoryManager = parentDirectoryManager;
         this.directoryManagerListener = directoryManagerListener;
-        this.name = path.getFileName().toString();
+        this.directoryName = path.getFileName().toString();
         updateUI();
     }
 
     public TreeMap<String, DirectoryManager> getDirectories() {
         return directories;
+    }
+
+
+    public DirectoryManager getChildDirectoryManager(String directoryName) {
+        return directories.get(directoryName);
+    }
+
+    public DirectoryManager getDirectorManager(Path path) {
+        return directoryManagerListener.getDirectoryManager(path);
+    }
+
+    public DirectoryManager getParentDirectoryManager() {
+        return parentDirectoryManager;
     }
 
     public TreeSet<String> getFiles() {

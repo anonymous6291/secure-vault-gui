@@ -6,6 +6,7 @@ import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.net.URL;
 
 public class FileIconView extends MouseAdapter {
     private static final int FILE_NAME_WIDTH = Constants.ICON_WIDTH;
@@ -22,29 +23,17 @@ public class FileIconView extends MouseAdapter {
         this.fileName = fileName;
         this.directory = directory;
         this.fileIconViewEventListener = fileIconViewEventListener;
-        Image icon;
+        URL iconURL;
         if (directory) {
-            icon = IconManager.getDirectoryIcon();
-            if (icon != null) {
-                icon = icon.getScaledInstance(FILE_ICON_WIDTH, FILE_ICON_HEIGHT, Image.SCALE_SMOOTH);
-            }
+            iconURL = IconManager.getDirectoryIconURL();
         } else {
-            icon = IconManager.getFileIcon(fileName);
-            if (icon != null) {
-                icon = icon.getScaledInstance(FILE_ICON_WIDTH, FILE_ICON_HEIGHT, Image.SCALE_SMOOTH);
-            }
+            iconURL = IconManager.getFileIconURL(fileName);
         }
-        Image imageIcon = icon;
         jPanel = new JPanel(new BorderLayout());
         jPanel.setOpaque(false);
-        JPanel iconPanel = new JPanel() {
-            @Override
-            public void paint(Graphics g) {
-                super.paintComponents(g);
-                g.drawImage(imageIcon, 0, 0, this);
-            }
-        };
+        JPanel iconPanel = new ImagePanel(iconURL, FILE_ICON_WIDTH, FILE_ICON_HEIGHT);
         JLabel fileNameLabel = new JLabel(fileName);
+        fileNameLabel.setFont(Constants.FILE_NAME_FONT);
         fileNameLabel.setForeground(Constants.FILE_NAME_COLOR);
         fileNameLabel.setPreferredSize(new Dimension(FILE_NAME_WIDTH, FILE_NAME_HEIGHT));
         fileNameLabel.setVerticalAlignment(JLabel.CENTER);
