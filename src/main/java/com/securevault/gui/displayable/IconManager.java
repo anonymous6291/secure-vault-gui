@@ -1,4 +1,6 @@
-package com.securevault.gui;
+package com.securevault.gui.displayable;
+
+import com.securevault.gui.resource.ResourceManager;
 
 import java.net.URL;
 

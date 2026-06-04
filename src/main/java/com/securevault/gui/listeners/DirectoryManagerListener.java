@@ -1,4 +1,6 @@
-package com.securevault.gui;
+package com.securevault.gui.listeners;
+
+import com.securevault.gui.displayable.DirectoryManager;
 
 import javax.swing.*;
 import java.awt.*;

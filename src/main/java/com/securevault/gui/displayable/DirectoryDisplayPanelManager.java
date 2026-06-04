@@ -1,4 +1,6 @@
-package com.securevault.gui;
+package com.securevault.gui.displayable;
+
+import com.securevault.gui.resource.ResourceManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -32,15 +34,14 @@ public class DirectoryDisplayPanelManager {
         Icon backIcon = new ImageIcon(new ImageIcon(ResourceManager.getResource(BACK_BUTTON_ICON)).getImage().getScaledInstance(BACK_BUTTON_WIDTH, BACK_BUTTON_HEIGHT, Image.SCALE_SMOOTH));
         JButton backButton = new JButton("", backIcon);
         backButton.setPreferredSize(new Dimension(BACK_BUTTON_WIDTH, BACK_BUTTON_HEIGHT));
-        backButton.addActionListener(_ -> {
-            DirectoryManager parentDirectoryManager = directoryManager.getParentDirectoryManager();
-            if (parentDirectoryManager != null) {
-                parentDirectoryManager.display();
-            }
-        });
+        backButton.addActionListener(_ -> directoryManager.back());
         backButton.setFocusPainted(false);
-        JPanel pathFieldHolder = new JPanel();
+        JPanel pathFieldHolder = new JPanel(new FlowLayout(FlowLayout.CENTER));
         pathFieldHolder.setOpaque(false);
+        JLabel pathLabel = new JLabel("Path: ");
+        pathLabel.setForeground(Constants.PATH_LABEL_COLOR);
+        pathLabel.setFont(Constants.PATH_LABEL_FONT);
+        pathFieldHolder.add(pathLabel);
         JTextField pathField = new JTextField(directoryManager.getPath().toString());
         pathField.setPreferredSize(new Dimension(PATH_TEXT_AREA_WIDTH, PATH_TEXT_AREA_HEIGHT));
         pathField.setFont(Constants.PATH_FIELD_FONT);
@@ -51,6 +52,8 @@ public class DirectoryDisplayPanelManager {
                 DirectoryManager targetDirectoryManager = directoryManager.getDirectorManager(Path.of(pathField.getText()));
                 if (targetDirectoryManager != null) {
                     targetDirectoryManager.display();
+                } else {
+                    pathField.setText(directoryManager.getPath().toString());
                 }
             } catch (Exception e) {
                 IO.println(e);

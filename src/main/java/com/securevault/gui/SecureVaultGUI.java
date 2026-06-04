@@ -1,5 +1,11 @@
 package com.securevault.gui;
 
+import com.securevault.gui.displayable.Constants;
+import com.securevault.gui.displayable.DirectoryManager;
+import com.securevault.gui.displayable.ImagePanel;
+import com.securevault.gui.listeners.DirectoryManagerListener;
+import com.securevault.gui.resource.ResourceManager;
+
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
@@ -33,12 +39,16 @@ public class SecureVaultGUI implements DirectoryManagerListener {
         root = new DirectoryManager(Path.of(""), null, this);
         addFiles(files);
         jFrame.setVisible(true);
-        //root.display();
-        root.getChildDirectoryManager("a").display();
+        root.display();
+        //root.getChildDirectoryManager("a").display();
     }
 
     private String[] splitPath(Path path) {
-        return path.normalize().toString().split(Pattern.quote(File.separator));
+        String pathString = path.normalize().toString();
+        if (pathString.startsWith(File.separator)) {
+            pathString = pathString.substring(1);
+        }
+        return pathString.split(Pattern.quote(File.separator));
     }
 
     private void addFile0(Path path) {

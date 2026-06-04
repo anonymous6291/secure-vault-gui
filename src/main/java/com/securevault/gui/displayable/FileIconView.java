@@ -1,8 +1,8 @@
-package com.securevault.gui;
+package com.securevault.gui.displayable;
+
+import com.securevault.gui.listeners.FileIconViewEventListener;
 
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
-import javax.swing.border.Border;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -14,12 +14,13 @@ public class FileIconView extends MouseAdapter {
     private static final int FILE_ICON_WIDTH = Constants.ICON_WIDTH;
     private static final int FILE_ICON_HEIGHT = Constants.ICON_HEIGHT - FILE_NAME_HEIGHT;
     private final JPanel jPanel;
+    private final JPanel iconPanel;
     private final String fileName;
-    private final Border border = new BevelBorder(BevelBorder.LOWERED, Color.RED, Color.RED);
     private final boolean directory;
     private final FileIconViewEventListener fileIconViewEventListener;
+    private boolean borderSet;
 
-    FileIconView(String fileName, boolean directory, FileIconViewEventListener fileIconViewEventListener) {
+    public FileIconView(String fileName, boolean directory, FileIconViewEventListener fileIconViewEventListener) {
         this.fileName = fileName;
         this.directory = directory;
         this.fileIconViewEventListener = fileIconViewEventListener;
@@ -31,7 +32,11 @@ public class FileIconView extends MouseAdapter {
         }
         jPanel = new JPanel(new BorderLayout());
         jPanel.setOpaque(false);
-        JPanel iconPanel = new ImagePanel(iconURL, FILE_ICON_WIDTH, FILE_ICON_HEIGHT);
+        iconPanel = new JPanel(new BorderLayout());
+        JPanel icon = new ImagePanel(iconURL, FILE_ICON_WIDTH - 6, FILE_ICON_HEIGHT - 6);
+        icon.setOpaque(false);
+        iconPanel.add(icon, BorderLayout.CENTER);
+        iconPanel.setOpaque(false);
         JLabel fileNameLabel = new JLabel(fileName);
         fileNameLabel.setFont(Constants.FILE_NAME_FONT);
         fileNameLabel.setForeground(Constants.FILE_NAME_COLOR);
@@ -42,6 +47,7 @@ public class FileIconView extends MouseAdapter {
         jPanel.add(iconPanel, BorderLayout.CENTER);
         jPanel.add(fileNameLabel, BorderLayout.SOUTH);
         jPanel.addMouseListener(this);
+        removeBorder();
     }
 
     public JPanel getDisplayableComponent() {
@@ -57,15 +63,21 @@ public class FileIconView extends MouseAdapter {
     }
 
     public void setBorder() {
-        jPanel.setBorder(border);
+        iconPanel.setBorder(Constants.SELECTED_FILE_BORDER);
+        borderSet = true;
     }
 
     public void removeBorder() {
-        jPanel.setBorder(null);
+        iconPanel.setBorder(Constants.UNSELECTED_FILE_BORDER);
+        borderSet = false;
+    }
+
+    public boolean isBorderSet() {
+        return borderSet;
     }
 
     @Override
     public void mouseClicked(MouseEvent mouseEvent) {
-        fileIconViewEventListener.click(fileName, mouseEvent);
+        fileIconViewEventListener.click(this, mouseEvent);
     }
 }

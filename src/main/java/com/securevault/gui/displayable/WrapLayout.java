@@ -1,4 +1,4 @@
-package com.securevault.gui;
+package com.securevault.gui.displayable;
 
 import java.awt.*;
 import javax.swing.JScrollPane;

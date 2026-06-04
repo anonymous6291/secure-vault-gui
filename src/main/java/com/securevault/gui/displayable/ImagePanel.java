@@ -1,4 +1,4 @@
-package com.securevault.gui;
+package com.securevault.gui.displayable;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -12,7 +12,7 @@ public class ImagePanel extends JPanel {
     private final int width;
     private final int height;
 
-    ImagePanel(URL imageURL, int width, int height) {
+    public ImagePanel(URL imageURL, int width, int height) {
         BufferedImage bufferedImage = null;
         try {
             if (imageURL != null) {
@@ -27,8 +27,8 @@ public class ImagePanel extends JPanel {
     }
 
     @Override
-    public void paint(Graphics graphics) {
-        super.paint(graphics);
+    public void paintComponent(Graphics graphics) {
+        super.paintComponent(graphics);
         if (bufferedImage != null) {
             graphics.drawImage(bufferedImage, 0, 0, width, height, this);
         }
