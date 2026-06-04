@@ -1,6 +1,8 @@
-package com.securevault.gui.displayable;
+package com.securevault.gui.displayable.directory;
 
-import com.securevault.gui.listeners.FileIconViewEventListener;
+import com.securevault.gui.displayable.Constants;
+import com.securevault.gui.displayable.ImagePanel;
+import com.securevault.gui.displayable.directory.listeners.FileIconViewEventListener;
 
 import javax.swing.*;
 import java.awt.*;

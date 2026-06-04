@@ -1,4 +1,4 @@
-package com.securevault.gui.displayable;
+package com.securevault.gui.displayable.directory;
 
 import com.securevault.gui.resource.ResourceManager;
 

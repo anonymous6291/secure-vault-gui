@@ -1,6 +1,6 @@
-package com.securevault.gui.listeners;
+package com.securevault.gui.displayable.directory.listeners;
 
-import com.securevault.gui.displayable.FileIconView;
+import com.securevault.gui.displayable.directory.FileIconView;
 
 import java.awt.event.MouseEvent;
 

@@ -11,7 +11,7 @@ public class Main {
             files.add("a/b/c");
             files.add("d/b/c");
             for (int i = 0; i < 200; i++) {
-                files.add(i + ".c");
+                files.add(i + ".java");
             }
             SwingUtilities.invokeAndWait(() -> new SecureVaultGUI(files));
         } catch (Exception e) {

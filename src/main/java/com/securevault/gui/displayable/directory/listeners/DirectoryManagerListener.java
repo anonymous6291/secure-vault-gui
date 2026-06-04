@@ -1,6 +1,6 @@
-package com.securevault.gui.listeners;
+package com.securevault.gui.displayable.directory.listeners;
 
-import com.securevault.gui.displayable.DirectoryManager;
+import com.securevault.gui.displayable.directory.DirectoryManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,4 +20,6 @@ public interface DirectoryManagerListener {
     void getFile(Path from, Path to);
 
     void deleteFile(Path from);
+
+    void renameFile(Path path);
 }

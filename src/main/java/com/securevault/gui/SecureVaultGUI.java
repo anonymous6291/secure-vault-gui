@@ -1,22 +1,26 @@
 package com.securevault.gui;
 
 import com.securevault.gui.displayable.Constants;
-import com.securevault.gui.displayable.DirectoryManager;
 import com.securevault.gui.displayable.ImagePanel;
-import com.securevault.gui.listeners.DirectoryManagerListener;
+import com.securevault.gui.displayable.directory.DirectoryManager;
+import com.securevault.gui.displayable.directory.listeners.DirectoryManagerListener;
 import com.securevault.gui.resource.ResourceManager;
 
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.regex.Pattern;
 
 public class SecureVaultGUI implements DirectoryManagerListener {
-    private static final String BACKGROUND_IMAGE = "background_images/background.jpg";
+    private static final String FILES_VIEW_BACKGROUND_IMAGE = "background_images/background.jpg";
+    private static final String PASSWORD_VIEW_BACKGROUND_IMAGE = "background_images/background.jpg";
+    private static final String API_KEY_VIEW_BACKGROUND_IMAGE = "background_images/background.jpg";
     private final JFrame jFrame;
+    private final JPanel fileViewPanel;
+    private final JPanel passwordViewPanel;
+    private final JPanel apiKeyViewPanel;
     private final Dimension dimension;
     private final DirectoryManager root;
 
@@ -32,15 +36,28 @@ public class SecureVaultGUI implements DirectoryManagerListener {
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.setResizable(false);
         jFrame.setLocation((windowWidth - width) >> 1, (windowHeight - height) >> 1);
-        URL backgroundURL = ResourceManager.getResource(BACKGROUND_IMAGE);
-        JPanel background = new ImagePanel(backgroundURL, width, height);
-        background.setBackground(Color.CYAN);
-        jFrame.setContentPane(background);
+        fileViewPanel = getViewPanel(FILES_VIEW_BACKGROUND_IMAGE, width, height);
+        passwordViewPanel = getViewPanel(FILES_VIEW_BACKGROUND_IMAGE, width, height);
+        apiKeyViewPanel = getViewPanel(FILES_VIEW_BACKGROUND_IMAGE, width, height);
+        JTabbedPane tabbedPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
+        tabbedPane.add("Files", fileViewPanel);
+        tabbedPane.add("Passwords", passwordViewPanel);
+        tabbedPane.add("APIKeys", apiKeyViewPanel);
+        JPanel contentPane = new JPanel();
+        contentPane.setLayout(new BorderLayout());
+        contentPane.add(tabbedPane, BorderLayout.CENTER);
+        jFrame.setContentPane(contentPane);
         root = new DirectoryManager(Path.of(""), null, this);
         addFiles(files);
         jFrame.setVisible(true);
         root.display();
         //root.getChildDirectoryManager("a").display();
+    }
+
+    private JPanel getViewPanel(String background, int w, int h) {
+        JPanel jPanel = new ImagePanel(ResourceManager.getResource(background), w, h);
+        jPanel.setLayout(new BorderLayout());
+        return jPanel;
     }
 
     private String[] splitPath(Path path) {
@@ -66,12 +83,12 @@ public class SecureVaultGUI implements DirectoryManagerListener {
 
     @Override
     public void displayDirectory(JPanel jPanel) {
-        jFrame.setGlassPane(jPanel);
-        jPanel.setVisible(true);
-        jPanel.repaint();
-        jPanel.validate();
+        fileViewPanel.removeAll();
+        fileViewPanel.add(jPanel, BorderLayout.CENTER);
+        fileViewPanel.revalidate();
+        fileViewPanel.repaint();
+        jFrame.revalidate();
         jFrame.repaint();
-        jFrame.validate();
     }
 
     @Override
@@ -112,5 +129,9 @@ public class SecureVaultGUI implements DirectoryManagerListener {
     @Override
     public void deleteFile(Path from) {
 
+    }
+
+    @Override
+    public void renameFile(Path path) {
     }
 }

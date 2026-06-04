@@ -1,7 +1,8 @@
-package com.securevault.gui.displayable;
+package com.securevault.gui.displayable.directory;
 
-import com.securevault.gui.listeners.DirectoryManagerListener;
-import com.securevault.gui.listeners.FileIconViewEventListener;
+import com.securevault.gui.displayable.Constants;
+import com.securevault.gui.displayable.directory.listeners.DirectoryManagerListener;
+import com.securevault.gui.displayable.directory.listeners.FileIconViewEventListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -33,17 +34,18 @@ public class DirectoryManager implements FileIconViewEventListener {
         this.directoryManagerListener = directoryManagerListener;
         this.directoryName = path.getFileName().toString();
         this.uiChanged = true;
-        JMenuItem retrieveAction = getMenuItem("Retrieve", Action.GET);
-        JMenuItem addAction = getMenuItem("Add", Action.ADD);
-        JMenuItem deleteAction = getMenuItem("Delete", Action.DELETE);
-        popupMenu.add(retrieveAction);
-        popupMenu.add(addAction);
-        popupMenu.add(deleteAction);
+        popupMenu.add(getMenuItem("Retrieve", Action.RETRIEVE));
+        popupMenu.add(getMenuItem("Delete", Action.DELETE));
+        popupMenu.add(getMenuItem("Rename", Action.RENAME));
+        popupMenu.add(getMenuItem("Add File", Action.ADD));
         updateUI();
     }
 
     private JMenuItem getMenuItem(String label, Action action) {
         JMenuItem jMenuItem = new JMenuItem(label);
+        jMenuItem.setBackground(Constants.POPUP_MENU_BACKGROUND);
+        jMenuItem.setForeground(Constants.POPUP_MENU_FOREGROUND);
+        jMenuItem.setFont(Constants.POPUP_MENU_FONT);
         jMenuItem.addActionListener(_ -> manageAction(action));
         return jMenuItem;
     }
@@ -130,6 +132,7 @@ public class DirectoryManager implements FileIconViewEventListener {
             unlock();
         }
     }
+
     private JPanel getDisplayPanel0() {
         return displayPanel;
     }
@@ -163,21 +166,15 @@ public class DirectoryManager implements FileIconViewEventListener {
     public void click(FileIconView currentSelectedFileIconView, MouseEvent mouseEvent) {
         setLock();
         try {
+            lastSelectedFileIconView.removeBorder();
+            currentSelectedFileIconView.setBorder();
             if (mouseEvent.getButton() == MouseEvent.BUTTON3) {
                 popupMenu.show(currentSelectedFileIconView.getDisplayableComponent(), mouseEvent.getX(), mouseEvent.getY());
             } else if (mouseEvent.getClickCount() > 1) {
-                currentSelectedFileIconView.setBorder();
                 String fileName = currentSelectedFileIconView.getFileName();
                 if (directories.containsKey(fileName)) {
                     directories.get(fileName).display();
                 }
-            } else if (lastSelectedFileIconView != currentSelectedFileIconView) {
-                lastSelectedFileIconView.removeBorder();
-                currentSelectedFileIconView.setBorder();
-            } else if (currentSelectedFileIconView.isBorderSet()) {
-                currentSelectedFileIconView.removeBorder();
-            } else {
-                currentSelectedFileIconView.setBorder();
             }
             lastSelectedFileIconView = currentSelectedFileIconView;
         } finally {
@@ -185,7 +182,7 @@ public class DirectoryManager implements FileIconViewEventListener {
         }
     }
 
-    static enum Action {
-        GET, ADD, DELETE
+    enum Action {
+        RETRIEVE, DELETE, RENAME, ADD
     }
 }
