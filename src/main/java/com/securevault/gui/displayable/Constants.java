@@ -4,6 +4,10 @@ import javax.swing.border.SoftBevelBorder;
 import java.awt.*;
 
 public class Constants {
+    public static final String FILES_VIEW_BACKGROUND_IMAGE = "background_images/background.jpg";
+    public static final String PASSWORD_VIEW_BACKGROUND_IMAGE = "background_images/background.jpg";
+    public static final String API_KEY_VIEW_BACKGROUND_IMAGE = "background_images/background.jpg";
+    public static final String BACK_BUTTON_ICON = "other_icons/back_button.png";
     public static final int ICON_WIDTH = 65;
     public static final int ICON_HEIGHT = 85;
     public static final int WIDTH = 900;
@@ -20,4 +24,9 @@ public class Constants {
     public static final Color POPUP_MENU_BACKGROUND = Color.PINK;
     public static final Color POPUP_MENU_FOREGROUND = Color.BLACK;
     public static final Font POPUP_MENU_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
+    public static final int BACK_BUTTON_WIDTH = 50;
+    public static final int BACK_BUTTON_HEIGHT = 50;
+    public static final int TOP_MENU_HEIGHT = 50;
+    public static final int PATH_TEXT_AREA_WIDTH = 300;
+    public static final int PATH_TEXT_AREA_HEIGHT = 30;
 }
