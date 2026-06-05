@@ -16,17 +16,25 @@ import java.util.regex.Pattern;
 import static com.securevault.gui.displayable.Constants.*;
 
 public class DirectoryViewManager implements DirectoryViewListener {
+    private final JFrame windowFrame;
     private final JPopupMenu settingPopupMenu = new JPopupMenu("Setting");
+    private JDialog closeVaultDialog;
+    private JDialog lockdownVaultDialog;
+    private JDialog destroyVaultDialog;
+    private JDialog selfDestructStatusDialog;
     private final DirectoryViewManagerListener directoryViewManagerListener;
     private final JPanel displayPanel;
     private final DirectoryView rootDirectoryView;
     private volatile DirectoryView currentDirectoryView;
     private JButton settingButton;
+    private final Dimension displaySize;
     private final Dimension directoryViewSize;
     private JTextField pathField;
 
-    public DirectoryViewManager(DirectoryViewManagerListener directoryViewManagerListener, Dimension displaySize) {
+    public DirectoryViewManager(JFrame windowFrame, DirectoryViewManagerListener directoryViewManagerListener, Dimension displaySize) {
+        this.windowFrame = windowFrame;
         this.directoryViewManagerListener = directoryViewManagerListener;
+        this.displaySize = displaySize;
         directoryViewSize = new Dimension(displaySize.width, displaySize.height - Constants.TOP_MENU_HEIGHT);
         rootDirectoryView = currentDirectoryView = new DirectoryView(Path.of(""), null, this);
         displayPanel = new ImagePanel(ResourceManager.getResource(FILES_VIEW_BACKGROUND_IMAGE), displaySize.width, displaySize.height);
@@ -79,14 +87,53 @@ public class DirectoryViewManager implements DirectoryViewListener {
 
     private void initSettingPopupMenu() {
         JMenuItem closeVault = getSettingMenuItem("Close Vault");
-        closeVault.addActionListener(_ -> manageCloseVaultMenu());
+        closeVault.addActionListener(_ -> manageSettingMenu(closeVaultDialog));
         JMenuItem lockdownVault = getSettingMenuItem("Lockdown Vault");
-        lockdownVault.addActionListener(_ -> manageLockdownVaultMenu());
+        lockdownVault.addActionListener(_ -> manageSettingMenu(lockdownVaultDialog));
+        JMenuItem destroyVault = getSettingMenuItem("Destroy Vault");
+        destroyVault.addActionListener(_ -> manageSettingMenu(destroyVaultDialog));
         JMenuItem selfDestructStatus = getSettingMenuItem("Self Destruct Status");
-        selfDestructStatus.addActionListener(_ -> manageSelfDestructStatusMenu());
+        selfDestructStatus.addActionListener(_ -> manageSettingMenu(selfDestructStatusDialog));
         settingPopupMenu.add(closeVault);
         settingPopupMenu.add(lockdownVault);
+        settingPopupMenu.add(destroyVault);
         settingPopupMenu.add(selfDestructStatus);
+        initCloseVaultDialog();
+        initLockdownVaultDialog();
+        initDestroyVaultDialog();
+        initSelfDestructStatusDialog();
+    }
+
+    private Point getSettingSubMenuPosition() {
+        return new Point((displaySize.width - SETTING_SUBMENU_DIALOG_WIDTH) >> 1, (displaySize.height - SETTING_SUBMENU_DIALOG_HEIGHT) >> 1);
+    }
+
+    private JDialog getSettingDefaultDialog(String top) {
+        JDialog jDialog = new JDialog(windowFrame, top, true);
+        jDialog.setSize(new Dimension(SETTING_SUBMENU_DIALOG_WIDTH, SETTING_SUBMENU_DIALOG_HEIGHT));
+        jDialog.setLocationRelativeTo(windowFrame);
+        jDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+        jDialog.setResizable(false);
+        JPanel jPanel = new JPanel();
+        jPanel.setBackground(Color.GREEN);
+        jDialog.add(jPanel);
+        return jDialog;
+    }
+
+    private void initCloseVaultDialog() {
+        closeVaultDialog = getSettingDefaultDialog("Close Vault");
+    }
+
+    private void initLockdownVaultDialog() {
+        lockdownVaultDialog = getSettingDefaultDialog( "Lockdown Vault");
+    }
+
+    private void initDestroyVaultDialog() {
+        destroyVaultDialog = getSettingDefaultDialog( "Destroy Vault");
+    }
+
+    private void initSelfDestructStatusDialog() {
+        selfDestructStatusDialog = getSettingDefaultDialog( "Self Destruct Status");
     }
 
     private void displaySettingPopupMenu() {
@@ -161,13 +208,8 @@ public class DirectoryViewManager implements DirectoryViewListener {
         displayPanel.repaint();
     }
 
-    private void manageCloseVaultMenu() {
-    }
-
-    private void manageLockdownVaultMenu() {
-    }
-
-    private void manageSelfDestructStatusMenu() {
+    private void manageSettingMenu(JDialog jDialog) {
+        jDialog.setVisible(true);
     }
 
     @Override

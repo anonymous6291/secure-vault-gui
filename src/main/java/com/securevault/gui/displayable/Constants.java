@@ -16,6 +16,8 @@ public class Constants {
     public static final Color SETTING_POPUP_MENU_BACKGROUND = Color.PINK;
     public static final Color SETTING_POPUP_MENU_FOREGROUND = Color.BLACK;
     public static final Font SETTING_POPUP_MENU_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
+    public static final int SETTING_SUBMENU_DIALOG_WIDTH = 400;
+    public static final int SETTING_SUBMENU_DIALOG_HEIGHT = 300;
     public static final int ICON_WIDTH = 65;
     public static final int ICON_HEIGHT = 85;
     public static final int WIDTH = 900;

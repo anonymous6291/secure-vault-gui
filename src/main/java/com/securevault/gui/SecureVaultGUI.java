@@ -32,7 +32,7 @@ public class SecureVaultGUI implements DirectoryViewManagerListener {
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.setResizable(false);
         jFrame.setLocation((windowWidth - width) >> 1, (windowHeight - height) >> 1);
-        directoryViewManager = new DirectoryViewManager(this, dimension);
+        directoryViewManager = new DirectoryViewManager(jFrame, this, dimension);
         passwordViewPanel = getViewPanel(FILES_VIEW_BACKGROUND_IMAGE, width, height);
         apiKeyViewPanel = getViewPanel(FILES_VIEW_BACKGROUND_IMAGE, width, height);
         JTabbedPane tabbedPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
@@ -62,8 +62,12 @@ public class SecureVaultGUI implements DirectoryViewManagerListener {
     }
 
     @Override
-    public void lockdown(long duration) {
+    public void close() {
 
+    }
+
+    @Override
+    public void lockdown(long duration) {
     }
 
     @Override
@@ -77,7 +81,10 @@ public class SecureVaultGUI implements DirectoryViewManagerListener {
     }
 
     @Override
-    public void setSelfDestruct() {
+    public void setSelfDestruct(int tries) {
+    }
 
+    @Override
+    public void selfDestructVault() {
     }
 }
