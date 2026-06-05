@@ -2,17 +2,14 @@ package com.securevault.gui;
 
 import com.securevault.gui.displayable.Constants;
 import com.securevault.gui.displayable.ImagePanel;
-import com.securevault.gui.displayable.directory.DirectoryView;
 import com.securevault.gui.displayable.directory.DirectoryViewManager;
 import com.securevault.gui.displayable.directory.listeners.DirectoryViewManagerListener;
 import com.securevault.gui.resource.ResourceManager;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import static com.securevault.gui.displayable.Constants.FILES_VIEW_BACKGROUND_IMAGE;
 
@@ -23,7 +20,7 @@ public class SecureVaultGUI implements DirectoryViewManagerListener {
     private final JPanel apiKeyViewPanel;
     private final Dimension dimension;
 
-    SecureVaultGUI(List<Path> files)  {
+    SecureVaultGUI() {
         jFrame = new JFrame("SecureVault");
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         int windowWidth = toolkit.getScreenSize().width;
@@ -46,7 +43,6 @@ public class SecureVaultGUI implements DirectoryViewManagerListener {
         contentPane.setLayout(new BorderLayout());
         contentPane.add(tabbedPane, BorderLayout.CENTER);
         jFrame.setContentPane(contentPane);
-        addFiles(files);
         jFrame.setVisible(true);
         //root.getChildDirectoryManager("a").display();
     }

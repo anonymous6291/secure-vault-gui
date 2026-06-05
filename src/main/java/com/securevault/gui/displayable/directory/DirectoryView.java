@@ -47,9 +47,9 @@ public class DirectoryView implements FileIconViewEventListener {
 
     private JMenuItem getMenuItem(String label, DirectoryViewAction action) {
         JMenuItem jMenuItem = new JMenuItem(label);
-        jMenuItem.setBackground(Constants.POPUP_MENU_BACKGROUND);
-        jMenuItem.setForeground(Constants.POPUP_MENU_FOREGROUND);
-        jMenuItem.setFont(Constants.POPUP_MENU_FONT);
+        jMenuItem.setBackground(Constants.FILE_POPUP_MENU_BACKGROUND);
+        jMenuItem.setForeground(Constants.FILE_POPUP_MENU_FOREGROUND);
+        jMenuItem.setFont(Constants.FILE_POPUP_MENU_FONT);
         jMenuItem.addActionListener(_ -> manageAction(action));
         return jMenuItem;
     }

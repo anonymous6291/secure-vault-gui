@@ -16,18 +16,22 @@ import java.util.regex.Pattern;
 import static com.securevault.gui.displayable.Constants.*;
 
 public class DirectoryViewManager implements DirectoryViewListener {
+    private final JPopupMenu settingPopupMenu = new JPopupMenu("Setting");
     private final DirectoryViewManagerListener directoryViewManagerListener;
     private final JPanel displayPanel;
+    private final DirectoryView rootDirectoryView;
     private volatile DirectoryView currentDirectoryView;
+    private JButton settingButton;
     private final Dimension directoryViewSize;
     private JTextField pathField;
 
     public DirectoryViewManager(DirectoryViewManagerListener directoryViewManagerListener, Dimension displaySize) {
         this.directoryViewManagerListener = directoryViewManagerListener;
         directoryViewSize = new Dimension(displaySize.width, displaySize.height - Constants.TOP_MENU_HEIGHT);
-        currentDirectoryView = new DirectoryView(Path.of(""), null, this);
+        rootDirectoryView = currentDirectoryView = new DirectoryView(Path.of(""), null, this);
         displayPanel = new ImagePanel(ResourceManager.getResource(FILES_VIEW_BACKGROUND_IMAGE), displaySize.width, displaySize.height);
         displayPanel.setLayout(new BorderLayout());
+        initSettingPopupMenu();
         displayPanel.add(getTopView(displaySize), BorderLayout.NORTH);
         displayPanel.add(currentDirectoryView.getDisplayComponent(), BorderLayout.CENTER);
     }
@@ -54,16 +58,46 @@ public class DirectoryViewManager implements DirectoryViewListener {
         pathField.setForeground(Constants.PATH_FIELD_FOREGROUND);
         pathField.addActionListener(_ -> gotoDirectory(pathField.getText()));
         pathFieldHolder.add(pathField);
+        Icon setting = new ImageIcon(new ImageIcon(ResourceManager.getResource(SETTING_BUTTON_ICON)).getImage().getScaledInstance(SETTING_BUTTON_WIDTH, SETTING_BUTTON_HEIGHT, Image.SCALE_SMOOTH));
+        settingButton = new JButton("", setting);
+        settingButton.setPreferredSize(new Dimension(SETTING_BUTTON_WIDTH, SETTING_BUTTON_HEIGHT));
+        settingButton.setFocusPainted(false);
+        settingButton.addActionListener(_ -> displaySettingPopupMenu());
         jPanel.add(backButton, BorderLayout.WEST);
         jPanel.add(pathFieldHolder, BorderLayout.CENTER);
+        jPanel.add(settingButton, BorderLayout.EAST);
         return jPanel;
+    }
+
+    private JMenuItem getSettingMenuItem(String message) {
+        JMenuItem jMenuItem = new JMenuItem(message);
+        jMenuItem.setBackground(SETTING_POPUP_MENU_BACKGROUND);
+        jMenuItem.setForeground(SETTING_POPUP_MENU_FOREGROUND);
+        jMenuItem.setFont(SETTING_POPUP_MENU_FONT);
+        return jMenuItem;
+    }
+
+    private void initSettingPopupMenu() {
+        JMenuItem closeVault = getSettingMenuItem("Close Vault");
+        closeVault.addActionListener(_ -> manageCloseVaultMenu());
+        JMenuItem lockdownVault = getSettingMenuItem("Lockdown Vault");
+        lockdownVault.addActionListener(_ -> manageLockdownVaultMenu());
+        JMenuItem selfDestructStatus = getSettingMenuItem("Self Destruct Status");
+        selfDestructStatus.addActionListener(_ -> manageSelfDestructStatusMenu());
+        settingPopupMenu.add(closeVault);
+        settingPopupMenu.add(lockdownVault);
+        settingPopupMenu.add(selfDestructStatus);
+    }
+
+    private void displaySettingPopupMenu() {
+        settingPopupMenu.show(settingButton, -150, 20);
     }
 
     public JPanel getDisplayPanel() {
         return displayPanel;
     }
 
-    public void changePathLabel() {
+    private void changePathLabel() {
         pathField.setText(currentDirectoryView.getPath().toString());
     }
 
@@ -111,11 +145,29 @@ public class DirectoryViewManager implements DirectoryViewListener {
     }
 
     public void gotoDirectory(String path) {
+        String[] paths = splitPath(Path.of(path));
+        DirectoryView current = rootDirectoryView;
+        for (String subPath : paths) {
+            current = current.getChildDirectoryView(subPath);
+            if (current == null) {
+                return;
+            }
+        }
+        current.display();
     }
 
     public void refreshUI() {
         displayPanel.validate();
         displayPanel.repaint();
+    }
+
+    private void manageCloseVaultMenu() {
+    }
+
+    private void manageLockdownVaultMenu() {
+    }
+
+    private void manageSelfDestructStatusMenu() {
     }
 
     @Override
