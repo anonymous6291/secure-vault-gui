@@ -63,11 +63,12 @@ public class SecureVaultGUI implements DirectoryViewManagerListener {
 
     @Override
     public void close() {
-
+        IO.println("Close");
     }
 
     @Override
     public void lockdown(long duration) {
+        IO.println("Lockdown: " + duration);
     }
 
     @Override
@@ -82,9 +83,17 @@ public class SecureVaultGUI implements DirectoryViewManagerListener {
 
     @Override
     public void setSelfDestruct(int tries) {
+        IO.println("Tries: " + tries);
     }
 
     @Override
-    public void selfDestructVault() {
+    public void disableSelfDestruct() {
+        IO.println("Disable");
+    }
+
+    @Override
+    public void selfDestructVault(String password) {
+        IO.println("Destroy: " + password);
+        throw new RuntimeException();
     }
 }

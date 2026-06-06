@@ -11,5 +11,7 @@ public interface DirectoryViewManagerListener {
 
     void setSelfDestruct(int tries);
 
-    void selfDestructVault();
+    void disableSelfDestruct();
+
+    void selfDestructVault(String password);
 }
