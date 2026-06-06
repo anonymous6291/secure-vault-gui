@@ -33,6 +33,9 @@ public class DirectoryViewManager implements DirectoryViewListener {
     private JLabel destroyVaultPasswordLabel;
     private JPasswordField destroyVaultPasswordField;
     private JDialog selfDestructStatusDialog;
+    private JToggleButton selfDestructEnabled;
+    private JLabel selfDestructTriesLabel;
+    private JTextField selfDestructTriesTextField;
     private volatile DirectoryView currentDirectoryView;
     private JButton settingButton;
     private JTextField pathField;
@@ -119,7 +122,6 @@ public class DirectoryViewManager implements DirectoryViewListener {
         initLockdownVaultDialog();
         initDestroyVaultDialog();
         initSelfDestructStatusDialog();
-        manageSettingMenu(selfDestructStatusDialog);
     }
 
     private JDialog getSettingDefaultDialog(String top) {
@@ -264,13 +266,55 @@ public class DirectoryViewManager implements DirectoryViewListener {
         JButton yes = getButton("Destroy", CONFIRM_BUTTON_BACKGROUND, CONFIRM_BUTTON_FOREGROUND, CONFIRM_BUTTON_FONT, _ -> destroyVault());
         buttonContainer.add(yes, gridBagConstraints);
         jPanel.add(buttonContainer, gbc);
-        destroyVaultDialog.add(jPanel);
+        destroyVaultDialog.setContentPane(jPanel);
         destroyVaultDialog.validate();
         destroyVaultDialog.repaint();
     }
 
     private void initSelfDestructStatusDialog() {
         selfDestructStatusDialog = getSettingDefaultDialog("Self Destruct Status");
+        JPanel jPanel = new JPanel(new GridBagLayout());
+        jPanel.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
+        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.weightx = 1;
+        gridBagConstraints.weighty = 1;
+        gridBagConstraints.fill = GridBagConstraints.BOTH;
+        JLabel jLabel = getMessageLabel(SELF_DESTRUCT_MENU_MESSAGE);
+        jPanel.add(jLabel, gridBagConstraints);
+        gridBagConstraints.gridy++;
+        JPanel valuePanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 1));
+        valuePanel.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
+        JLabel label = getMessageLabel(SELF_DESTRUCT_TOGGLE_BUTTON_LABEL_MESSAGE);
+        valuePanel.add(label);
+        selfDestructEnabled = new JToggleButton();
+        selfDestructEnabled.setFocusPainted(false);
+        selfDestructEnabled.addActionListener(_ -> updateValuesAccordingToSelfDestructToggleButton());
+        selfDestructEnabled.setForeground(Color.BLACK);
+        selfDestructEnabled.setFont(TEXT_FIELD_FONT);
+        valuePanel.add(selfDestructEnabled);
+        selfDestructTriesLabel = getMessageLabel(SELF_DESTRUCT_TRIES_FIELD_LABEL_MESSAGE);
+        valuePanel.add(selfDestructTriesLabel);
+        selfDestructTriesTextField = new JTextField(10);
+        selfDestructTriesTextField.setBackground(TEXT_FIELD_BACKGROUND);
+        selfDestructTriesTextField.setForeground(TEXT_FIELD_FOREGROUND);
+        selfDestructTriesTextField.setFont(TEXT_FIELD_FONT);
+        selfDestructTriesTextField.setPreferredSize(new Dimension(50, 30));
+        valuePanel.add(selfDestructTriesTextField);
+        selfDestructEnabled.setSelected(directoryViewManagerListener.isSelfDestructEnabled());
+        selfDestructTriesTextField.setText(Integer.toString(directoryViewManagerListener.getSelfDestructTries()));
+        updateValuesAccordingToSelfDestructToggleButton();
+        jPanel.add(valuePanel, gridBagConstraints);
+        gridBagConstraints.gridy++;
+        JPanel buttonContainer = new JPanel(new FlowLayout(FlowLayout.CENTER, 50, 1));
+        buttonContainer.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
+        JButton cancel = getButton("Cancel", CONFIRM_BUTTON_BACKGROUND, CONFIRM_BUTTON_FOREGROUND, CONFIRM_BUTTON_FONT, _ -> selfDestructStatusDialog.setVisible(false));
+        buttonContainer.add(cancel);
+        JButton save = getButton("Save", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> handleSelfDestructSelection());
+        buttonContainer.add(save);
+        jPanel.add(buttonContainer, gridBagConstraints);
+        selfDestructStatusDialog.setContentPane(jPanel);
         selfDestructStatusDialog.validate();
         selfDestructStatusDialog.repaint();
     }
@@ -389,18 +433,48 @@ public class DirectoryViewManager implements DirectoryViewListener {
         }
     }
 
+    private void updateValuesAccordingToSelfDestructToggleButton() {
+        if (selfDestructEnabled.isSelected()) {
+            selfDestructEnabled.setBackground(Color.GREEN);
+            selfDestructEnabled.setText("Yes");
+            selfDestructTriesTextField.setEditable(true);
+        } else {
+            selfDestructEnabled.setBackground(Color.RED);
+            selfDestructEnabled.setText("No");
+            selfDestructTriesTextField.setEditable(false);
+        }
+    }
+
+    private void handleSelfDestructSelection() {
+        updateValuesAccordingToSelfDestructToggleButton();
+        if (selfDestructEnabled.isSelected()) {
+            try {
+                int tries = Integer.parseInt(selfDestructTriesTextField.getText());
+                if (tries <= 0) {
+                    throw new RuntimeException();
+                }
+                directoryViewManagerListener.setSelfDestruct(tries);
+                selfDestructTriesLabel.setText(SELF_DESTRUCT_TRIES_FIELD_LABEL_MESSAGE);
+            } catch (Exception _) {
+                selfDestructTriesLabel.setText(SELF_DESTRUCT_TRIES_FIELD_LABEL_INVALID_MESSAGE);
+                return;
+            }
+        } else {
+            disableSelfDestruct();
+        }
+        selfDestructStatusDialog.setVisible(false);
+    }
+
     private int getSelfDestructTries() {
         return directoryViewManagerListener.getSelfDestructTries();
     }
 
     private void disableSelfDestruct() {
         directoryViewManagerListener.disableSelfDestruct();
-        IO.println("Disable");
     }
 
     private void setSelfDestruct() {
         directoryViewManagerListener.setSelfDestruct(0);
-        IO.println("Enable: " + 0);
     }
 
     @Override

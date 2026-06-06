@@ -22,7 +22,7 @@ public class Constants {
     public static final Color SETTING_SUBMENU_DIALOG_FOREGROUND = Color.BLACK;
     public static final Font SETTING_SUBMENU_DIALOG_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
     public static final int CONFIRM_AND_CANCEL_BUTTON_WIDTH = 100;
-    public static final int CONFIRM_AND_CANCEL_BUTTON_HEIGHT = 50;
+    public static final int CONFIRM_AND_CANCEL_BUTTON_HEIGHT = 40;
     public static final Color CONFIRM_BUTTON_BACKGROUND = Color.RED.brighter();
     public static final Color CONFIRM_BUTTON_FOREGROUND = Color.BLACK;
     public static final Font CONFIRM_BUTTON_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
@@ -54,5 +54,8 @@ public class Constants {
     public static final String LOCKDOWN_VAULT_DURATION_FIELD_LABEL_INVALID_MESSAGE = "<html> Duration (Invalid!): </html>";
     public static final String DESTROY_VAULT_PASSWORD_FIELD_LABEL_MESSAGE = "<html> Password :</html>";
     public static final String DESTROY_VAULT_PASSWORD_FIELD_LABEL_ERROR_MESSAGE = "<html> Password (Failed!): </html>";
+    public static final String SELF_DESTRUCT_MENU_MESSAGE = "<html>When enabled, after given number of wrong password tries the vault will be destroyed.</html>";
+    public static final String SELF_DESTRUCT_TOGGLE_BUTTON_LABEL_MESSAGE = "<html>Enabled? </html>";
+    public static final String SELF_DESTRUCT_TRIES_FIELD_LABEL_MESSAGE = "<html>Tries: </html>";
+    public static final String SELF_DESTRUCT_TRIES_FIELD_LABEL_INVALID_MESSAGE = "<html>Tries (Invalid!): </html>";
 }
-
