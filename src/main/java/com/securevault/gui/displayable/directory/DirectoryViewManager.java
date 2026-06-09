@@ -11,6 +11,7 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -24,6 +25,11 @@ public class DirectoryViewManager implements DirectoryViewListener {
     private final DirectoryView rootDirectoryView;
     private final Dimension displaySize;
     private final Dimension directoryViewSize;
+    private final JFileChooser fileChooser;
+    private JDialog renameFileDialog;
+    private JLabel renameFileNewNameLabel;
+    private JTextField targetRenameFile;
+    private JTextField renameFileNewName;
     private JDialog closeVaultDialog;
     private JDialog lockdownVaultDialog;
     private JLabel lockdownVaultDurationLabel;
@@ -48,9 +54,16 @@ public class DirectoryViewManager implements DirectoryViewListener {
         rootDirectoryView = currentDirectoryView = new DirectoryView(Path.of(""), null, this);
         displayPanel = new ImagePanel(ResourceManager.getResource(FILES_VIEW_BACKGROUND_IMAGE), displaySize.width, displaySize.height);
         displayPanel.setLayout(new BorderLayout());
+        fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Choose files to add");
+        fileChooser.setApproveButtonText("Add");
+        fileChooser.setMultiSelectionEnabled(true);
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+        initRenameFileDialog();
         initSettingPopupMenu();
         displayPanel.add(getTopView(displaySize), BorderLayout.NORTH);
         displayPanel.add(currentDirectoryView.getDisplayComponent(), BorderLayout.CENTER);
+        renameFileDialog.setVisible(true);
     }
 
     private static JLabel getMessageLabel(String message) {
@@ -62,6 +75,55 @@ public class DirectoryViewManager implements DirectoryViewListener {
         jLabel.setHorizontalAlignment(JLabel.CENTER);
         jLabel.setVerticalTextPosition(JLabel.CENTER);
         return jLabel;
+    }
+
+    private JTextField getTextField(int columns, int width) {
+        JTextField jTextField = new JTextField(columns);
+        jTextField.setBackground(TEXT_FIELD_BACKGROUND);
+        jTextField.setForeground(TEXT_FIELD_FOREGROUND);
+        jTextField.setFont(TEXT_FIELD_FONT);
+        jTextField.setPreferredSize(new Dimension(width, 30));
+        return jTextField;
+    }
+
+    private void initRenameFileDialog() {
+        renameFileDialog = getSettingDefaultDialog("Rename File");
+        JPanel jPanel = new JPanel(new GridBagLayout());
+        jPanel.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.gridwidth = 1;
+        gbc.gridheight = 1;
+        jPanel.add(getMessageLabel(RENAME_FILE_LABEL_TARGET_FILE_MESSAGE), gbc);
+        gbc.gridy++;
+        targetRenameFile = getTextField(30, 50);
+        targetRenameFile.setEditable(false);
+        JPanel container = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        container.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
+        container.add(targetRenameFile);
+        jPanel.add(container, gbc);
+        gbc.gridy++;
+        renameFileNewNameLabel = getMessageLabel(RENAME_FILE_LABEL_NEW_FILE_MESSAGE);
+        jPanel.add(renameFileNewNameLabel, gbc);
+        gbc.gridy++;
+        container = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        container.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
+        renameFileNewName = getTextField(10, 50);
+        container.add(renameFileNewName);
+        jPanel.add(container, gbc);
+        gbc.gridy++;
+        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER, 50, 0));
+        buttons.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
+        JButton no = getButton("Cancel", CONFIRM_BUTTON_BACKGROUND, CONFIRM_BUTTON_FOREGROUND, CONFIRM_BUTTON_FONT, _ -> renameFileDialog.setVisible(false));
+        buttons.add(no);
+        JButton yes = getButton("Rename", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> renameButtonTriggered());
+        buttons.add(yes);
+        jPanel.add(buttons, gbc);
+        renameFileDialog.setContentPane(jPanel);
     }
 
     private JComponent getTopView(Dimension dimension) {
@@ -192,14 +254,10 @@ public class DirectoryViewManager implements DirectoryViewListener {
         labelPanel.add(jLabel, BorderLayout.CENTER);
         jPanel.add(labelPanel, gbc);
         gbc.gridy++;
-        JPanel fieldPanel = new JPanel(new FlowLayout());
+        JPanel fieldPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 0));
         fieldPanel.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
         lockdownVaultDurationLabel = getMessageLabel(LOCKDOWN_VAULT_DURATION_FIELD_LABEL_MESSAGE);
-        lockdownVaultDuration = new JTextField("", 5);
-        lockdownVaultDuration.setPreferredSize(new Dimension(80, 30));
-        lockdownVaultDuration.setBackground(TEXT_FIELD_BACKGROUND);
-        lockdownVaultDuration.setForeground(TEXT_FIELD_FOREGROUND);
-        lockdownVaultDuration.setFont(TEXT_FIELD_FONT);
+        lockdownVaultDuration = getTextField(5, 80);
         lockdownVaultDurationUnit = new JComboBox<>(new String[]{"Minute", "Hour", "Day"});
         lockdownVaultDurationUnit.setBackground(TEXT_FIELD_BACKGROUND);
         lockdownVaultDurationUnit.setForeground(TEXT_FIELD_FOREGROUND);
@@ -296,11 +354,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
         valuePanel.add(selfDestructEnabled);
         selfDestructTriesLabel = getMessageLabel(SELF_DESTRUCT_TRIES_FIELD_LABEL_MESSAGE);
         valuePanel.add(selfDestructTriesLabel);
-        selfDestructTriesTextField = new JTextField(10);
-        selfDestructTriesTextField.setBackground(TEXT_FIELD_BACKGROUND);
-        selfDestructTriesTextField.setForeground(TEXT_FIELD_FOREGROUND);
-        selfDestructTriesTextField.setFont(TEXT_FIELD_FONT);
-        selfDestructTriesTextField.setPreferredSize(new Dimension(50, 30));
+        selfDestructTriesTextField = getTextField(10, 50);
         valuePanel.add(selfDestructTriesTextField);
         selfDestructEnabled.setSelected(directoryViewManagerListener.isSelfDestructEnabled());
         selfDestructTriesTextField.setText(Integer.toString(directoryViewManagerListener.getSelfDestructTries()));
@@ -364,6 +418,19 @@ public class DirectoryViewManager implements DirectoryViewListener {
 
     public void addFiles(List<Path> files) {
         files.forEach(this::addFile0);
+    }
+
+    public void deleteFile(Path path) {
+        String[] paths = splitPath(path);
+        DirectoryView directoryView = rootDirectoryView;
+        int n = paths.length - 1;
+        for (int i = 0; i < n; i++) {
+            directoryView = directoryView.getChildDirectoryView(paths[i]);
+            if (directoryView == null) {
+                return;
+            }
+        }
+        directoryView.deleteFile(paths[n]);
     }
 
     public void back() {
@@ -460,21 +527,12 @@ public class DirectoryViewManager implements DirectoryViewListener {
                 return;
             }
         } else {
-            disableSelfDestruct();
+            directoryViewManagerListener.disableSelfDestruct();
         }
         selfDestructStatusDialog.setVisible(false);
     }
 
-    private int getSelfDestructTries() {
-        return directoryViewManagerListener.getSelfDestructTries();
-    }
-
-    private void disableSelfDestruct() {
-        directoryViewManagerListener.disableSelfDestruct();
-    }
-
-    private void setSelfDestruct() {
-        directoryViewManagerListener.setSelfDestruct(0);
+    private void renameButtonTriggered() {
     }
 
     @Override
@@ -488,6 +546,25 @@ public class DirectoryViewManager implements DirectoryViewListener {
     }
 
     @Override
-    public void actionPerformed(Path filePath, boolean isDirectory, DirectoryViewAction action) {
+    public void actionPerformed(Path filePath, DirectoryViewAction action) {
+        switch (action) {
+            case ADD -> {
+                try {
+                    fileChooser.setSelectedFile(null);
+                    if (fileChooser.showDialog(displayPanel, null) == JFileChooser.APPROVE_OPTION) {
+                        File[] selectedFiles = fileChooser.getSelectedFiles();
+                        if (selectedFiles != null) {
+                            Arrays.stream(selectedFiles).forEach(x -> directoryViewManagerListener.addFileToVault(x.toPath()));
+                        }
+                    }
+                } catch (Exception e) {
+                    IO.println(e);
+                }
+            }
+            case RETRIEVE -> directoryViewManagerListener.retrieveFileFromVault(filePath);
+            case DELETE -> directoryViewManagerListener.deleteFileFromVault(filePath);
+            case RENAME -> {
+            }
+        }
     }
 }

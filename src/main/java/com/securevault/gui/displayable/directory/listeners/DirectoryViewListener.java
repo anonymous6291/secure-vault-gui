@@ -11,5 +11,5 @@ public interface DirectoryViewListener {
 
     Dimension getDisplayDimension();
 
-    void actionPerformed(Path filePath, boolean isDirectory, DirectoryViewAction directoryViewAction);
+    void actionPerformed(Path filePath, DirectoryViewAction directoryViewAction);
 }

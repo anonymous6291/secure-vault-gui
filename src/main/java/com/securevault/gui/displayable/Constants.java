@@ -48,6 +48,10 @@ public class Constants {
     public static final int TOP_MENU_HEIGHT = 50;
     public static final int PATH_TEXT_AREA_WIDTH = 300;
     public static final int PATH_TEXT_AREA_HEIGHT = 30;
+    public static final String RENAME_FILE_LABEL_TARGET_FILE_MESSAGE = "<html>Target file:</html>";
+    public static final String RENAME_FILE_LABEL_NEW_FILE_MESSAGE = "<html>New name of the file:</html>";
+    public static final String RENAME_FILE_LABEL_NEW_FILE_ALREADY_EXISTS_MESSAGE = "<html>New name of the file: (File with same name already exists.)</html>";
+    public static final String RENAME_FILE_LABEL_NEW_FILE_INVALID_NAME = "<html>New name of the file: (Invalid file name)</html>";
     public static final String LOCKDOWN_VAULT_MENU_MESSAGE = "<html> Vault will is not be accessible during lockdown mode but the data is safe. If you want to proceed then enter the duration of lockdown. (This action is not revertible!)</html>";
     public static final String DESTROY_VAULT_MENU_MESSAGE = "<html> Destroying the vault will cause you to lose all the contents. If you really want to destroy the vault then enter the password and proceed. (This action is not revertible!)</html>";
     public static final String LOCKDOWN_VAULT_DURATION_FIELD_LABEL_MESSAGE = "<html> Duration :</html>";

@@ -66,7 +66,7 @@ public class DirectoryView implements FileIconViewEventListener {
     }
 
     private void manageAction(DirectoryViewAction action) {
-        directoryViewListener.actionPerformed(Path.of(path.toString(), lastSelectedFileIconView.getFileName()), lastSelectedFileIconView.isDirectory(), action);
+        directoryViewListener.actionPerformed(Path.of(path.toString(), lastSelectedFileIconView.getFileName()), action);
     }
 
     public TreeMap<String, DirectoryView> getDirectories() {
@@ -82,6 +82,25 @@ public class DirectoryView implements FileIconViewEventListener {
         try {
             files.add(fileName);
             fileIconViewMap.put(fileName, new FileIconView(fileName, false, this));
+        } finally {
+            unlock();
+        }
+        uiChanged = true;
+        updateUI();
+    }
+
+    public void deleteFile(String fileName) {
+        setLock();
+        try {
+            FileIconView fileIconView = fileIconViewMap.remove(fileName);
+            if (fileIconView == null) {
+                return;
+            }
+            if (fileIconView.isDirectory()) {
+                directories.remove(fileName);
+            } else {
+                files.remove(fileName);
+            }
         } finally {
             unlock();
         }

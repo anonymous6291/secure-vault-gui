@@ -62,6 +62,27 @@ public class SecureVaultGUI implements DirectoryViewManagerListener {
     }
 
     @Override
+    public void addFileToVault(Path filePath) {
+        IO.println("ADD: " + filePath);
+    }
+
+    @Override
+    public void retrieveFileFromVault(Path path) {
+        IO.println("Retrieve: " + path);
+    }
+
+    @Override
+    public void deleteFileFromVault(Path path) {
+        IO.println("Delete: " + path);
+        directoryViewManager.deleteFile(path);
+    }
+
+    @Override
+    public void renameFileFromVault(Path path, String newName) {
+        IO.println("Rename :" + path + " => " + newName);
+    }
+
+    @Override
     public void close() {
         IO.println("Close");
     }
