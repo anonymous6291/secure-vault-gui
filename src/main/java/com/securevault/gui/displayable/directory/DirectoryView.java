@@ -21,8 +21,7 @@ public class DirectoryView implements FileIconViewEventListener {
     private final TreeMap<String, DirectoryView> directories = new TreeMap<>();
     private final TreeSet<String> files = new TreeSet<>();
     private final Map<String, FileIconView> fileIconViewMap = new HashMap<>();
-    private final Path path;
-    private final String directoryName;
+    private String directoryName;
     private final DirectoryView parentDirectoryView;
     private final DirectoryViewListener directoryViewListener;
     private final Semaphore lock = new Semaphore(1, true);
@@ -30,11 +29,10 @@ public class DirectoryView implements FileIconViewEventListener {
     private volatile boolean uiChanged;
     private FileIconView lastSelectedFileIconView = new FileIconView("", false, this);
 
-    public DirectoryView(Path path, DirectoryView parentDirectoryView, DirectoryViewListener directoryViewListener) {
-        this.path = path;
+    public DirectoryView(String directoryName, DirectoryView parentDirectoryView, DirectoryViewListener directoryViewListener) {
         this.parentDirectoryView = parentDirectoryView;
         this.directoryViewListener = directoryViewListener;
-        this.directoryName = path.getFileName().toString();
+        this.directoryName = directoryName;
         this.uiChanged = true;
         displayComponent = new JPanel(new BorderLayout());
         displayComponent.setOpaque(false);
@@ -65,8 +63,16 @@ public class DirectoryView implements FileIconViewEventListener {
         lock.release();
     }
 
+    public void setDirectoryName(String newName) {
+        directoryName = newName;
+    }
+
+    public String getDirectoryName() {
+        return directoryName;
+    }
+
     private void manageAction(DirectoryViewAction action) {
-        directoryViewListener.actionPerformed(Path.of(path.toString(), lastSelectedFileIconView.getFileName()), action);
+        directoryViewListener.actionPerformed(Path.of(getPath().toString(), lastSelectedFileIconView.getFileName()), action);
     }
 
     public TreeMap<String, DirectoryView> getDirectories() {
@@ -75,6 +81,15 @@ public class DirectoryView implements FileIconViewEventListener {
 
     public TreeSet<String> getFiles() {
         return files;
+    }
+
+    public boolean fileExists(String fileName) {
+        setLock();
+        try {
+            return directories.containsKey(fileName) || files.contains(fileName);
+        } finally {
+            unlock();
+        }
     }
 
     public void addFile(String fileName) {
@@ -108,6 +123,30 @@ public class DirectoryView implements FileIconViewEventListener {
         updateUI();
     }
 
+    public void renameFile(String targetFile, String newFileName) {
+        setLock();
+        try {
+            FileIconView fileIconView = fileIconViewMap.remove(targetFile);
+            if (fileIconView == null) {
+                return;
+            }
+            fileIconView.setFileName(newFileName);
+            fileIconViewMap.put(newFileName, fileIconView);
+            if (fileIconView.isDirectory()) {
+                DirectoryView directoryView = directories.remove(targetFile);
+                directoryView.setDirectoryName(newFileName);
+                directories.put(newFileName, directoryView);
+            } else {
+                files.remove(targetFile);
+                files.add(newFileName);
+            }
+        } finally {
+            unlock();
+        }
+        uiChanged = true;
+        updateUI();
+    }
+
     public DirectoryView getOrMakeChildDirectoryView(String directoryName) {
         setLock();
         boolean uiChanged = false;
@@ -117,7 +156,7 @@ public class DirectoryView implements FileIconViewEventListener {
                 return childDirectoryView;
             }
             uiChanged = true;
-            directories.put(directoryName, childDirectoryView = new DirectoryView(Path.of(path.toString(), directoryName), this, directoryViewListener));
+            directories.put(directoryName, childDirectoryView = new DirectoryView(directoryName, this, directoryViewListener));
             fileIconViewMap.put(directoryName, new FileIconView(directoryName, true, this));
             return childDirectoryView;
         } finally {
@@ -138,7 +177,10 @@ public class DirectoryView implements FileIconViewEventListener {
     }
 
     public Path getPath() {
-        return path;
+        if (parentDirectoryView == null) {
+            return Path.of(directoryName);
+        }
+        return Path.of(getParentDirectoryView().getPath().toString(), directoryName);
     }
 
     public Map<String, FileIconView> getFileIconViewMap() {

@@ -17,7 +17,8 @@ public class FileIconView extends MouseAdapter {
     private static final int FILE_ICON_HEIGHT = Constants.ICON_HEIGHT - FILE_NAME_HEIGHT;
     private final JPanel jPanel;
     private final JPanel iconPanel;
-    private final String fileName;
+    private final JLabel fileNameLabel;
+    private String fileName;
     private final boolean directory;
     private final FileIconViewEventListener fileIconViewEventListener;
     private boolean borderSet;
@@ -39,7 +40,7 @@ public class FileIconView extends MouseAdapter {
         icon.setOpaque(false);
         iconPanel.add(icon, BorderLayout.CENTER);
         iconPanel.setOpaque(false);
-        JLabel fileNameLabel = new JLabel(fileName);
+        fileNameLabel = new JLabel(fileName);
         fileNameLabel.setFont(Constants.FILE_NAME_FONT);
         fileNameLabel.setForeground(Constants.FILE_NAME_COLOR);
         fileNameLabel.setPreferredSize(new Dimension(FILE_NAME_WIDTH, FILE_NAME_HEIGHT));
@@ -58,6 +59,11 @@ public class FileIconView extends MouseAdapter {
 
     public String getFileName() {
         return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+        fileNameLabel.setText(fileName);
     }
 
     public boolean isDirectory() {

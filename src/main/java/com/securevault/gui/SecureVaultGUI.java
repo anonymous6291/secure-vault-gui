@@ -8,6 +8,7 @@ import com.securevault.gui.resource.ResourceManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -44,7 +45,6 @@ public class SecureVaultGUI implements DirectoryViewManagerListener {
         contentPane.add(tabbedPane, BorderLayout.CENTER);
         jFrame.setContentPane(contentPane);
         jFrame.setVisible(true);
-        //root.getChildDirectoryManager("a").display();
     }
 
     private JPanel getViewPanel(String background, int w, int h) {
@@ -61,9 +61,25 @@ public class SecureVaultGUI implements DirectoryViewManagerListener {
         directoryViewManager.addFiles(files);
     }
 
+    private void addFilesRecursively(Path path, Path removePath) {
+        try {
+            if (Files.isDirectory(path)) {
+                Files.list(path).forEach(subPath -> addFilesRecursively(subPath, removePath));
+            } else if (Files.isRegularFile(path)) {
+                addFile(removePath.relativize(path));
+            }
+        } catch (Exception _) {
+        }
+    }
+
     @Override
     public void addFileToVault(Path filePath) {
         IO.println("ADD: " + filePath);
+        Path parent = filePath.getParent();
+        if (parent == null) {
+            parent = Path.of("");
+        }
+        addFilesRecursively(filePath, parent);
     }
 
     @Override

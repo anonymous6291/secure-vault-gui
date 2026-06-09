@@ -51,7 +51,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
         this.directoryViewManagerListener = directoryViewManagerListener;
         this.displaySize = displaySize;
         directoryViewSize = new Dimension(displaySize.width, displaySize.height - Constants.TOP_MENU_HEIGHT);
-        rootDirectoryView = currentDirectoryView = new DirectoryView(Path.of(""), null, this);
+        rootDirectoryView = currentDirectoryView = new DirectoryView("", null, this);
         displayPanel = new ImagePanel(ResourceManager.getResource(FILES_VIEW_BACKGROUND_IMAGE), displaySize.width, displaySize.height);
         displayPanel.setLayout(new BorderLayout());
         fileChooser = new JFileChooser();
@@ -63,7 +63,6 @@ public class DirectoryViewManager implements DirectoryViewListener {
         initSettingPopupMenu();
         displayPanel.add(getTopView(displaySize), BorderLayout.NORTH);
         displayPanel.add(currentDirectoryView.getDisplayComponent(), BorderLayout.CENTER);
-        renameFileDialog.setVisible(true);
     }
 
     private static JLabel getMessageLabel(String message) {
@@ -397,6 +396,9 @@ public class DirectoryViewManager implements DirectoryViewListener {
     }
 
     private String[] splitPath(Path path) {
+        if (path == null) {
+            return new String[0];
+        }
         path = path.normalize();
         String pathString = path.normalize().toString();
         return pathString.split(Pattern.quote(File.separator));
@@ -533,6 +535,31 @@ public class DirectoryViewManager implements DirectoryViewListener {
     }
 
     private void renameButtonTriggered() {
+        try {
+            Path targetPath = Path.of(targetRenameFile.getText());
+            Path parentPath = targetPath.getParent();
+            String targetFileName = targetPath.getFileName().toString();
+            String[] paths = splitPath(parentPath);
+            DirectoryView directoryView = rootDirectoryView;
+            int n = paths.length - 1;
+            for (int i = 0; i < n; i++) {
+                directoryView = directoryView.getChildDirectoryView(paths[i]);
+                if (directoryView == null) {
+                    return;
+                }
+            }
+            String renamedName = renameFileNewName.getText();
+            if (directoryView.fileExists(renamedName)) {
+                renameFileNewNameLabel.setText(RENAME_FILE_LABEL_NEW_FILE_ALREADY_EXISTS_MESSAGE);
+            } else {
+                directoryViewManagerListener.renameFileFromVault(targetPath, renamedName);
+                currentDirectoryView.renameFile(targetFileName, renamedName);
+                renameFileDialog.setVisible(false);
+                renameFileNewNameLabel.setText(RENAME_FILE_LABEL_NEW_FILE_MESSAGE);
+            }
+        } catch (Exception e) {
+            renameFileNewNameLabel.setText(RENAME_FILE_LABEL_NEW_FILE_INVALID_NAME);
+        }
     }
 
     @Override
@@ -562,8 +589,29 @@ public class DirectoryViewManager implements DirectoryViewListener {
                 }
             }
             case RETRIEVE -> directoryViewManagerListener.retrieveFileFromVault(filePath);
-            case DELETE -> directoryViewManagerListener.deleteFileFromVault(filePath);
+            case DELETE -> {
+                try {
+                    DirectoryView directoryView = rootDirectoryView;
+                    String[] paths = splitPath(filePath);
+                    int n = paths.length - 1;
+                    for (int i = 0; i < n; i++) {
+                        directoryView = directoryView.getChildDirectoryView(paths[i]);
+                        if (directoryView == null) {
+                            return;
+                        }
+                    }
+                    directoryViewManagerListener.deleteFileFromVault(filePath);
+                    currentDirectoryView.deleteFile(filePath.getFileName().toString());
+                } catch (Exception e) {
+                    IO.println(e);
+                }
+            }
             case RENAME -> {
+                String filePathString = filePath.toString();
+                targetRenameFile.setText(filePathString);
+                targetRenameFile.setCaretPosition(filePathString.length());
+                renameFileNewName.setText("");
+                renameFileDialog.setVisible(true);
             }
         }
     }
