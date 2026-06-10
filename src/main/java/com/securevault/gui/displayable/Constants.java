@@ -1,12 +1,12 @@
 package com.securevault.gui.displayable;
 
+import javax.swing.border.BevelBorder;
 import javax.swing.border.SoftBevelBorder;
 import java.awt.*;
 
 public class Constants {
     public static final String FILES_VIEW_BACKGROUND_IMAGE = "background_images/background.jpg";
-    public static final String PASSWORD_VIEW_BACKGROUND_IMAGE = "background_images/background.jpg";
-    public static final String API_KEY_VIEW_BACKGROUND_IMAGE = "background_images/background.jpg";
+    public static final String KEYS_VIEW_BACKGROUND_IMAGE = "background_images/background.jpg";
     public static final int BACK_BUTTON_WIDTH = 50;
     public static final int BACK_BUTTON_HEIGHT = 50;
     public static final String BACK_BUTTON_ICON = "other_icons/back_button.png";
@@ -62,4 +62,9 @@ public class Constants {
     public static final String SELF_DESTRUCT_TOGGLE_BUTTON_LABEL_MESSAGE = "<html>Enabled? </html>";
     public static final String SELF_DESTRUCT_TRIES_FIELD_LABEL_MESSAGE = "<html>Tries: </html>";
     public static final String SELF_DESTRUCT_TRIES_FIELD_LABEL_INVALID_MESSAGE = "<html>Tries (Invalid!): </html>";
+
+    public static final BevelBorder KEY_VIEW_BORDER = new SoftBevelBorder(SoftBevelBorder.LOWERED,Color.GREEN,Color.CYAN);
+    public static final Color KEY_VIEW_BACKGROUND = new Color(148, 64, 189,210);
+    public static final int KEY_VIEW_HEIGHT = 50;
+    public static final Font KEY_LABEL_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
 }

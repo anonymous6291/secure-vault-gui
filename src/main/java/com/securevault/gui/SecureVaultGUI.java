@@ -1,10 +1,11 @@
 package com.securevault.gui;
 
 import com.securevault.gui.displayable.Constants;
-import com.securevault.gui.displayable.ImagePanel;
 import com.securevault.gui.displayable.directory.DirectoryViewManager;
 import com.securevault.gui.displayable.directory.listeners.DirectoryViewManagerListener;
-import com.securevault.gui.resource.ResourceManager;
+import com.securevault.gui.displayable.keys.KeyManager;
+import com.securevault.gui.displayable.keys.KeyType;
+import com.securevault.gui.displayable.keys.listeners.KeyManagerListener;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,13 +13,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static com.securevault.gui.displayable.Constants.FILES_VIEW_BACKGROUND_IMAGE;
-
-public class SecureVaultGUI implements DirectoryViewManagerListener {
+public class SecureVaultGUI implements DirectoryViewManagerListener, KeyManagerListener {
     private final JFrame jFrame;
     private final DirectoryViewManager directoryViewManager;
-    private final JPanel passwordViewPanel;
-    private final JPanel apiKeyViewPanel;
+    private final KeyManager passwordManager;
+    private final KeyManager apiKeyManager;
     private final Dimension dimension;
 
     SecureVaultGUI() {
@@ -34,23 +33,24 @@ public class SecureVaultGUI implements DirectoryViewManagerListener {
         jFrame.setResizable(false);
         jFrame.setLocation((windowWidth - width) >> 1, (windowHeight - height) >> 1);
         directoryViewManager = new DirectoryViewManager(jFrame, this, dimension);
-        passwordViewPanel = getViewPanel(FILES_VIEW_BACKGROUND_IMAGE, width, height);
-        apiKeyViewPanel = getViewPanel(FILES_VIEW_BACKGROUND_IMAGE, width, height);
+        passwordManager = new KeyManager(jFrame, this, KeyType.PASSWORD, dimension);
+        apiKeyManager = new KeyManager(jFrame, this, KeyType.API_KEY, dimension);
         JTabbedPane tabbedPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
         tabbedPane.add("Files", directoryViewManager.getDisplayPanel());
-        tabbedPane.add("Passwords", passwordViewPanel);
-        tabbedPane.add("APIKeys", apiKeyViewPanel);
+        tabbedPane.add("Passwords", passwordManager.getDisplayPanel());
+        tabbedPane.add("APIKeys", apiKeyManager.getDisplayPanel());
+        tabbedPane.setSelectedIndex(1);
         JPanel contentPane = new JPanel();
         contentPane.setLayout(new BorderLayout());
         contentPane.add(tabbedPane, BorderLayout.CENTER);
         jFrame.setContentPane(contentPane);
         jFrame.setVisible(true);
-    }
-
-    private JPanel getViewPanel(String background, int w, int h) {
-        JPanel jPanel = new ImagePanel(ResourceManager.getResource(background), w, h);
-        jPanel.setLayout(new BorderLayout());
-        return jPanel;
+        passwordManager.addKeysToView(List.of("google.com", "oracle.com", "openai.com", "whatsapp.com", "null.com", "java.com", "python.com", "rust.com", "swift.com", "c.com", "cpp.com"));
+        apiKeyManager.addKeysToView(List.of("google.com", "oracle.com", "openai.com", "whatsapp.com", "null.com", "java.com", "python.com", "rust.com", "swift.com", "c.com", "cpp.com"));
+        for (int i = 0; i < 100; i++) {
+            passwordManager.addKeyToView(i + "");
+            apiKeyManager.addKeyToView(i + "");
+        }
     }
 
     public void addFile(Path filePath) {
@@ -75,11 +75,6 @@ public class SecureVaultGUI implements DirectoryViewManagerListener {
     @Override
     public void addFileToVault(Path filePath) {
         IO.println("ADD: " + filePath);
-        Path parent = filePath.getParent();
-        if (parent == null) {
-            parent = Path.of("");
-        }
-        addFilesRecursively(filePath, parent);
     }
 
     @Override
@@ -132,5 +127,18 @@ public class SecureVaultGUI implements DirectoryViewManagerListener {
     public void selfDestructVault(String password) {
         IO.println("Destroy: " + password);
         throw new RuntimeException();
+    }
+
+    @Override
+    public void add(String name, String value, KeyType keyType) {
+    }
+
+    @Override
+    public String get(String name, KeyType keyType) {
+        return "";
+    }
+
+    @Override
+    public void delete(String name, KeyType keyType) {
     }
 }
