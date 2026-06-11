@@ -62,7 +62,6 @@ public class Constants {
     public static final String SELF_DESTRUCT_TOGGLE_BUTTON_LABEL_MESSAGE = "<html>Enabled? </html>";
     public static final String SELF_DESTRUCT_TRIES_FIELD_LABEL_MESSAGE = "<html>Tries: </html>";
     public static final String SELF_DESTRUCT_TRIES_FIELD_LABEL_INVALID_MESSAGE = "<html>Tries (Invalid!): </html>";
-
     public static final BevelBorder KEY_VIEW_BORDER = new SoftBevelBorder(SoftBevelBorder.LOWERED, Color.GREEN, Color.CYAN);
     public static final Color KEY_VIEW_BACKGROUND = new Color(53, 48, 60, 210);
     public static final Color KEY_VIEW_FOREGROUND = Color.PINK;

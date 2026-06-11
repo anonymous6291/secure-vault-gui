@@ -46,7 +46,7 @@ public class SecureVaultGUI implements DirectoryViewManagerListener, KeyManagerL
         contentPane.add(tabbedPane, BorderLayout.CENTER);
         jFrame.setContentPane(contentPane);
         jFrame.setVisible(true);
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i <= 100; i++) {
             Pair pair = new Pair("googly.com", i + "@gmail.com");
             passwordManager.addKeyToView(pair);
             apiKeyManager.addKeyToView(pair);
@@ -133,15 +133,17 @@ public class SecureVaultGUI implements DirectoryViewManagerListener, KeyManagerL
     }
 
     @Override
-    public void add(String name, String value, KeyType keyType) {
+    public void addKey(Pair pair, String value, KeyType keyType) {
+
     }
 
     @Override
-    public String get(String name, KeyType keyType) {
-        return "";
+    public String getKey(Pair pair, KeyType keyType) {
+        return "Hello";
     }
 
     @Override
-    public void delete(String name, KeyType keyType) {
+    public void deleteKey(Pair pair, KeyType keyType) {
+
     }
 }
