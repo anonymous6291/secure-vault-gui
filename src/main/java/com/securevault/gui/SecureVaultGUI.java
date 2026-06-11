@@ -5,6 +5,7 @@ import com.securevault.gui.displayable.directory.DirectoryViewManager;
 import com.securevault.gui.displayable.directory.listeners.DirectoryViewManagerListener;
 import com.securevault.gui.displayable.keys.KeyManager;
 import com.securevault.gui.displayable.keys.KeyType;
+import com.securevault.gui.displayable.keys.Pair;
 import com.securevault.gui.displayable.keys.listeners.KeyManagerListener;
 
 import javax.swing.*;
@@ -45,12 +46,14 @@ public class SecureVaultGUI implements DirectoryViewManagerListener, KeyManagerL
         contentPane.add(tabbedPane, BorderLayout.CENTER);
         jFrame.setContentPane(contentPane);
         jFrame.setVisible(true);
-        passwordManager.addKeysToView(List.of("google.com", "oracle.com", "openai.com", "whatsapp.com", "null.com", "java.com", "python.com", "rust.com", "swift.com", "c.com", "cpp.com"));
-        apiKeyManager.addKeysToView(List.of("google.com", "oracle.com", "openai.com", "whatsapp.com", "null.com", "java.com", "python.com", "rust.com", "swift.com", "c.com", "cpp.com"));
         for (int i = 0; i < 100; i++) {
-            passwordManager.addKeyToView(i + "");
-            apiKeyManager.addKeyToView(i + "");
+            Pair pair = new Pair("googly.com", i + "@gmail.com");
+            passwordManager.addKeyToView(pair);
+            apiKeyManager.addKeyToView(pair);
         }
+        Pair pair = new Pair("googly.com", 0 + "@gmail.com");
+        passwordManager.addKeyToView(pair);
+        apiKeyManager.addKeyToView(pair);
     }
 
     public void addFile(Path filePath) {

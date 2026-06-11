@@ -2,18 +2,20 @@ package com.securevault.gui.displayable.keys;
 
 import com.securevault.gui.displayable.Constants;
 import com.securevault.gui.displayable.ImagePanel;
+import com.securevault.gui.displayable.WrapLayout;
 import com.securevault.gui.displayable.keys.listeners.KeyManagerListener;
+import com.securevault.gui.displayable.keys.listeners.KeyViewListener;
 import com.securevault.gui.resource.ResourceManager;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeSet;
+import java.util.TreeMap;
 import java.util.concurrent.Semaphore;
 
-public class KeyManager {
+public class KeyManager implements KeyViewListener {
     private final JFrame windowFrame;
     private final KeyManagerListener keyManagerListener;
     private final KeyType keyType;
@@ -21,8 +23,7 @@ public class KeyManager {
     private final JPanel displayPanel;
     private final JPanel keyViews;
     private final Semaphore lock = new Semaphore(1, true);
-    private final TreeSet<String> keys = new TreeSet<>();
-    private final Map<String, KeyView> keyViewMap = new HashMap<>();
+    private final Map<Pair, KeyView> keyViewMap = new TreeMap<>();
 
     public KeyManager(JFrame windowFrame, KeyManagerListener keyManagerListener, KeyType keyType, Dimension dimension) {
         this.windowFrame = windowFrame;
@@ -51,45 +52,42 @@ public class KeyManager {
         lock.release();
     }
 
-    private void addKeyToView0(String name) {
+    private void addKeyToView0(Pair pair) {
         setLock();
-        keys.add(name);
-        keyViewMap.put(name, new KeyView(name, dimension.width >> 1));
+        keyViewMap.put(pair, new KeyView(pair, this));
         unlock();
     }
 
-    public void addKeyToView(String name) {
-        addKeyToView0(name);
+    public void addKeyToView(Pair pair) {
+        addKeyToView0(pair);
         updateUI();
     }
 
-    public void addKeysToView(List<String> names) {
-        names.forEach(this::addKeyToView0);
+    public void addKeysToView(List<Pair> values) {
+        values.forEach(this::addKeyToView0);
         updateUI();
     }
 
-    private void deleteKeyFromView0(String name) {
+    private void deleteKeyFromView0(Pair pair) {
         setLock();
         unlock();
     }
 
-    public void deleteKeyFromView(String name) {
-        deleteKeyFromView0(name);
+    public void deleteKeyFromView(Pair pair) {
+        deleteKeyFromView0(pair);
         updateUI();
     }
 
     private void updateUI() {
         setLock();
         try {
-            JPanel jPanel = new JPanel(new GridLayout(0, 2));
+            JPanel jPanel = new JPanel(new WrapLayout(WrapLayout.LEFT, 20, 20));
             JScrollPane jScrollPane = new JScrollPane(jPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
             jScrollPane.getVerticalScrollBar().setUnitIncrement(20);
             jScrollPane.setOpaque(false);
             jScrollPane.getViewport().setOpaque(false);
             jPanel.setOpaque(false);
-            for (String name : keys) {
-                jPanel.add(keyViewMap.get(name).getView());
-            }
+            keyViewMap.values().forEach(x -> jPanel.add(x.getView()));
             keyViews.removeAll();
             keyViews.validate();
             keyViews.add(jScrollPane, BorderLayout.CENTER);
@@ -98,5 +96,14 @@ public class KeyManager {
         } finally {
             unlock();
         }
+    }
+
+    @Override
+    public String getValue(Pair pair) {
+        return "Hello World!!!!";
+    }
+
+    @Override
+    public void clicked(MouseEvent mouseEvent, KeyView keyView) {
     }
 }

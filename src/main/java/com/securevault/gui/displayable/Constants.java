@@ -63,8 +63,21 @@ public class Constants {
     public static final String SELF_DESTRUCT_TRIES_FIELD_LABEL_MESSAGE = "<html>Tries: </html>";
     public static final String SELF_DESTRUCT_TRIES_FIELD_LABEL_INVALID_MESSAGE = "<html>Tries (Invalid!): </html>";
 
-    public static final BevelBorder KEY_VIEW_BORDER = new SoftBevelBorder(SoftBevelBorder.LOWERED,Color.GREEN,Color.CYAN);
-    public static final Color KEY_VIEW_BACKGROUND = new Color(148, 64, 189,210);
-    public static final int KEY_VIEW_HEIGHT = 50;
+    public static final BevelBorder KEY_VIEW_BORDER = new SoftBevelBorder(SoftBevelBorder.LOWERED, Color.GREEN, Color.CYAN);
+    public static final Color KEY_VIEW_BACKGROUND = new Color(53, 48, 60, 210);
+    public static final Color KEY_VIEW_FOREGROUND = Color.PINK;
+    public static final int KEY_VIEW_WIDTH = 400;
+    public static final int KEY_VIEW_HEIGHT = 200;
     public static final Font KEY_LABEL_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
+    public static final SoftBevelBorder SELECTED_KEY_BORDER = new SoftBevelBorder(SoftBevelBorder.LOWERED, Color.GREEN, Color.GREEN);
+    public static final SoftBevelBorder UNSELECTED_KEY_BORDER = new SoftBevelBorder(SoftBevelBorder.LOWERED, new Color(0, 0, 0, 0), new Color(0, 0, 0, 0));
+    public static final Color PASSWORD_VIEW_FIELD_BACKGROUND = KEY_VIEW_BACKGROUND.brighter().brighter();
+    public static final Color PASSWORD_VIEW_FIELD_FOREGROUND = Color.BLACK;
+    public static final Font PASSWORD_VIEW_FIELD_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
+    public static final Color SHOW_PASSWORD_BUTTON_BACKGROUND =KEY_VIEW_BACKGROUND.brighter().brighter();
+    public static final Color SHOW_PASSWORD_BUTTON_FOREGROUND = Color.CYAN;
+    public static final Font SHOW_PASSWORD_BUTTON_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
+    public static final Color COPY_BUTTON_BACKGROUND = KEY_VIEW_BACKGROUND.brighter().brighter();
+    public static final Color COPY_BUTTON_FOREGROUND = Color.CYAN;
+    public static final Font COPY_BUTTON_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
 }
