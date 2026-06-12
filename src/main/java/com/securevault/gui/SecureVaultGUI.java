@@ -134,16 +134,17 @@ public class SecureVaultGUI implements DirectoryViewManagerListener, KeyManagerL
 
     @Override
     public void addKey(Pair pair, String value, KeyType keyType) {
-
+        IO.println("ADD : " + pair + " : " + value + " : " + keyType);
     }
 
     @Override
     public String getKey(Pair pair, KeyType keyType) {
+        IO.println("GET : " + pair + " : " + keyType);
         return "Hello";
     }
 
     @Override
     public void deleteKey(Pair pair, KeyType keyType) {
-
+        IO.println("DELETE : " + pair + " : " + keyType);
     }
 }

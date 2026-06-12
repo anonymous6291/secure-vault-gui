@@ -127,9 +127,9 @@ public class KeyManager implements KeyViewListener {
         gbc.fill = GridBagConstraints.BOTH;
         gbc.weightx = 1.0;
         gbc.weighty = 1.0;
-        addOrEditDialogWebsiteFieldLabel = getLabel("Website: ");
-        addOrEditDialogIdFieldLabel = getLabel("ID: ");
-        addOrEditDialogValueFieldLabel = getLabel("Value: ");
+        addOrEditDialogWebsiteFieldLabel = getLabel(WEBSITE_FIELD_MESSAGE);
+        addOrEditDialogIdFieldLabel = getLabel(ID_FIELD_MESSAGE);
+        addOrEditDialogValueFieldLabel = getLabel(VALUE_FIELD_MESSAGE);
         jPanel.add(getFieldPanel(addOrEditDialogWebsiteFieldLabel, addOrEditDialogWebsiteField), gbc);
         gbc.gridy++;
         jPanel.add(getFieldPanel(addOrEditDialogIdFieldLabel, addOrEditDialogIdField), gbc);
@@ -247,8 +247,45 @@ public class KeyManager implements KeyViewListener {
 
 
     private void addOrEditConfirmButtonPressed() {
-        Pair pair = new Pair(addOrEditDialogWebsiteField.getText(), addOrEditDialogIdField.getText());
+        String websiteName = addOrEditDialogWebsiteField.getText();
+        String id = addOrEditDialogIdField.getText();
         String value = addOrEditDialogValueField.getText();
+        boolean flag = false;
+        if (websiteName.isEmpty()) {
+            addOrEditDialogWebsiteFieldLabel.setText(WEBSITE_FIELD_ERROR_MESSAGE);
+            flag = true;
+        } else {
+            addOrEditDialogWebsiteFieldLabel.setText(WEBSITE_FIELD_MESSAGE);
+        }
+        if (id.isEmpty()) {
+            addOrEditDialogIdFieldLabel.setText(ID_FIELD_ERROR_MESSAGE);
+            flag = true;
+        } else {
+            addOrEditDialogIdFieldLabel.setText(ID_FIELD_MESSAGE);
+        }
+        if (value.isEmpty()) {
+            addOrEditDialogValueFieldLabel.setText(VALUE_FIELD_ERROR_MESSAGE);
+            flag = true;
+        } else {
+            addOrEditDialogValueFieldLabel.setText(VALUE_FIELD_MESSAGE);
+        }
+        if (flag) {
+            return;
+        }
+        Pair pair = new Pair(websiteName, id);
+        if (addMode) {
+            if (keyViewMap.containsKey(pair)) {
+                addOrEditDialogIdFieldLabel.setText(ID_FIELD_EXISTS_MESSAGE);
+                return;
+            }
+            addOrEditDialogIdFieldLabel.setText(ID_FIELD_MESSAGE);
+            addKeyToView(pair);
+        } else {
+            keyManagerListener.deleteKey(pair, keyType);
+        }
+        keyManagerListener.addKey(pair, value, keyType);
+        addOrEditKeyDialog.setVisible(false);
+        addOrEditDialogValueFieldLabel.setText("");
     }
 
     private void deleteConfirmButtonPressed() {
@@ -286,7 +323,7 @@ public class KeyManager implements KeyViewListener {
 
     @Override
     public String getValue(Pair pair) {
-        return "Hello World!!!!";
+        return keyManagerListener.getKey(pair, keyType);
     }
 
     @Override

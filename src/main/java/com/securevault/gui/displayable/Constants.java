@@ -79,4 +79,11 @@ public class Constants {
     public static final Color COPY_BUTTON_BACKGROUND = KEY_VIEW_BACKGROUND.brighter().brighter();
     public static final Color COPY_BUTTON_FOREGROUND = Color.CYAN;
     public static final Font COPY_BUTTON_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
+    public static final String WEBSITE_FIELD_MESSAGE = "Website: ";
+    public static final String WEBSITE_FIELD_ERROR_MESSAGE = "Website:(Invalid)";
+    public static final String ID_FIELD_MESSAGE = "ID: ";
+    public static final String ID_FIELD_ERROR_MESSAGE = "ID:(Invalid)";
+    public static final String ID_FIELD_EXISTS_MESSAGE = "ID:(Exists)";
+    public static final String VALUE_FIELD_MESSAGE = "Value: ";
+    public static final String VALUE_FIELD_ERROR_MESSAGE = "Value:(Invalid)";
 }
