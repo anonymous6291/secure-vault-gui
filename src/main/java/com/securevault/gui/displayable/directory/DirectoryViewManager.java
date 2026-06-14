@@ -8,11 +8,12 @@ import com.securevault.gui.resource.ResourceManager;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Pattern;
 
 import static com.securevault.gui.displayable.Constants.*;
@@ -23,9 +24,9 @@ public class DirectoryViewManager implements DirectoryViewListener {
     private final DirectoryViewManagerListener directoryViewManagerListener;
     private final JPanel displayPanel;
     private final DirectoryView rootDirectoryView;
-    private final Dimension displaySize;
     private final Dimension directoryViewSize;
     private final JFileChooser fileChooser;
+    private final FileProgressViewer fileProgressViewer;
     private JDialog renameFileDialog;
     private JLabel renameFileNewNameLabel;
     private JTextField targetRenameFile;
@@ -49,7 +50,6 @@ public class DirectoryViewManager implements DirectoryViewListener {
     public DirectoryViewManager(JFrame windowFrame, DirectoryViewManagerListener directoryViewManagerListener, Dimension displaySize) {
         this.windowFrame = windowFrame;
         this.directoryViewManagerListener = directoryViewManagerListener;
-        this.displaySize = displaySize;
         directoryViewSize = new Dimension(displaySize.width, displaySize.height - Constants.TOP_MENU_HEIGHT);
         rootDirectoryView = currentDirectoryView = new DirectoryView("", null, this);
         displayPanel = new ImagePanel(ResourceManager.getResource(FILES_VIEW_BACKGROUND_IMAGE), displaySize.width, displaySize.height);
@@ -63,6 +63,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
         initSettingPopupMenu();
         displayPanel.add(getTopView(displaySize), BorderLayout.NORTH);
         displayPanel.add(currentDirectoryView.getDisplayComponent(), BorderLayout.CENTER);
+        fileProgressViewer = new FileProgressViewer(directoryViewManagerListener, windowFrame);
     }
 
     private static JLabel getMessageLabel(String message) {
@@ -460,6 +461,10 @@ public class DirectoryViewManager implements DirectoryViewListener {
         displayPanel.repaint();
     }
 
+    public void shutdown() {
+        fileProgressViewer.stop();
+    }
+
     private void manageSettingMenu(JDialog jDialog) {
         jDialog.setVisible(true);
     }
@@ -591,6 +596,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
             case RETRIEVE -> directoryViewManagerListener.retrieveFileFromVault(filePath);
             case DELETE -> {
                 try {
+                    directoryViewManagerListener.deleteFileFromVault(filePath);
                     DirectoryView directoryView = rootDirectoryView;
                     String[] paths = splitPath(filePath);
                     int n = paths.length - 1;
@@ -600,7 +606,6 @@ public class DirectoryViewManager implements DirectoryViewListener {
                             return;
                         }
                     }
-                    directoryViewManagerListener.deleteFileFromVault(filePath);
                     currentDirectoryView.deleteFile(filePath.getFileName().toString());
                 } catch (Exception e) {
                     IO.println(e);
@@ -613,6 +618,166 @@ public class DirectoryViewManager implements DirectoryViewListener {
                 renameFileNewName.setText("");
                 renameFileDialog.setVisible(true);
             }
+        }
+    }
+
+    static class FileProgressViewer implements Runnable {
+        private static final int REFRESH_DELAY_MS = 300;
+        private final DirectoryViewManagerListener directoryViewManagerListener;
+        private final ConcurrentLinkedQueue<String> failedTransferFileMessages = new ConcurrentLinkedQueue<>();
+        private final JFrame jFrame;
+        private final JDialog jDialog;
+        private JDialog failedFileDialog;
+        private JPanel failedFilesPanel;
+        private JLabel failedFilesListLabel;
+        private final JPanel jPanel;
+        private JPanel progressPanel;
+        private JLabel progressLabel;
+        private JProgressBar jProgressBar;
+        private JPanel failedFilePanel;
+        private JLabel failedFileLabel;
+        private volatile boolean stop;
+
+        public FileProgressViewer(DirectoryViewManagerListener directoryViewManagerListener, JFrame jFrame) {
+            this.directoryViewManagerListener = directoryViewManagerListener;
+            this.jFrame = jFrame;
+            jDialog = new JDialog(jFrame, "");
+            jDialog.setSize(new Dimension(PROGRESS_WIDTH, PROGRESS_HEIGHT));
+            jDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+            jDialog.setResizable(false);
+            setLocation();
+            jFrame.addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentMoved(ComponentEvent e) {
+                    setLocation();
+                }
+            });
+            directoryViewManagerListener.registerFailedFileTransferConsumer(failedTransferFileMessages::offer);
+            jPanel = new JPanel(new GridLayout(0, 1));
+            jPanel.setOpaque(true);
+            jDialog.setContentPane(jPanel);
+            jDialog.setVisible(false);
+            initProgressUI();
+            initFailedFileUI();
+            Thread.startVirtualThread(this);
+        }
+
+        void initProgressUI() {
+            progressPanel = new JPanel(new GridLayout(0, 1));
+            progressPanel.setBackground(Color.GREEN);
+            progressLabel = getMessageLabel("Transferring 5000 files....");
+            JPanel container = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            container.setOpaque(false);
+            jProgressBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
+            jProgressBar.setIndeterminate(false);
+            jProgressBar.setValue(50);
+            jProgressBar.setStringPainted(true);
+            jProgressBar.setString("50%");
+            container.add(jProgressBar);
+            progressPanel.add(progressLabel);
+            progressPanel.add(container);
+        }
+
+        void initFailedFileUI() {
+            failedFileDialog = new JDialog(jFrame, "Failed files", true);
+            failedFileDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+            failedFileDialog.setSize(SETTING_SUBMENU_DIALOG_WIDTH, SETTING_SUBMENU_DIALOG_HEIGHT);
+            failedFileDialog.setLocationRelativeTo(jFrame);
+            failedFileDialog.setVisible(false);
+            failedFilesListLabel = getMessageLabel("");
+            failedFilesPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            failedFilesPanel.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
+            failedFilesPanel.add(failedFilesListLabel);
+            JScrollPane jScrollPane = new JScrollPane(failedFilesPanel);
+            jScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+            jScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+            jScrollPane.getVerticalScrollBar().setUnitIncrement(20);
+            failedFileDialog.setContentPane(jScrollPane);
+            failedFilePanel = new JPanel(new BorderLayout());
+            failedFilePanel.setBackground(Color.BLUE.brighter());
+            failedFileLabel = getMessageLabel("10 files failed to transfer, click to show the list....");
+            failedFileLabel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    showFailedFileMessages();
+                }
+            });
+            failedFilePanel.add(failedFileLabel, BorderLayout.CENTER);
+        }
+
+        void showFailedFileMessages() {
+            int n = failedTransferFileMessages.size();
+            if (n == 0) {
+                return;
+            }
+            StringBuilder stringBuilder = new StringBuilder("<html>");
+            for (int i = 0; i < n; i++) {
+                stringBuilder.append(failedTransferFileMessages.poll()).append("<br>");
+            }
+            failedFilesListLabel.setText(stringBuilder.append("</html>").toString());
+            failedFileDialog.setVisible(true);
+        }
+
+        public void run() {
+            boolean progressPanelAdded = false;
+            boolean failedFilePanelAdded = false;
+            int n, h = 0;
+            while (!stop) {
+                if ((n = directoryViewManagerListener.getNumberOfPendingFileTransfer()) != 0) {
+                    progressLabel.setText("Transferring " + n + " files.");
+                    double p = directoryViewManagerListener.getFileTransferProgress();
+                    jProgressBar.setValue((int) p);
+                    jProgressBar.setString(p + "%");
+                    if (!progressPanelAdded) {
+                        jPanel.add(progressPanel);
+                        progressPanelAdded = true;
+                    }
+                } else if (progressPanelAdded) {
+                    jPanel.remove(progressPanel);
+                    progressPanelAdded = false;
+                }
+                if ((n = failedTransferFileMessages.size()) != 0) {
+                    failedFileLabel.setText("Failed to transfer " + n + " files. Click to view them.");
+                    if (!failedFilePanelAdded) {
+                        jPanel.add(failedFilePanel);
+                        failedFilePanelAdded = true;
+                    }
+                } else if (failedFilePanelAdded) {
+                    jPanel.remove(failedFilePanel);
+                    failedFilePanelAdded = false;
+                }
+                if (progressPanelAdded && failedFilePanelAdded) {
+                    if (h != PROGRESS_HEIGHT) {
+                        jDialog.setSize(PROGRESS_WIDTH, h = PROGRESS_HEIGHT);
+                        jDialog.setVisible(true);
+                        setLocation();
+                    }
+                } else if (progressPanelAdded || failedFilePanelAdded) {
+                    if (h != (PROGRESS_HEIGHT >> 1)) {
+                        jDialog.setSize(PROGRESS_WIDTH, h = PROGRESS_HEIGHT >> 1);
+                        jDialog.setVisible(true);
+                        setLocation();
+                    }
+                } else {
+                    if (h != 0) {
+                        h = 0;
+                        jDialog.setVisible(false);
+                    }
+                }
+                try {
+                    Thread.sleep(REFRESH_DELAY_MS);
+                } catch (Exception _) {
+                }
+            }
+        }
+
+        private void setLocation() {
+            Point point = jFrame.getLocation();
+            jDialog.setLocation(new Point(point.x + 3, point.y + jFrame.getSize().height - jDialog.getSize().height - 5));
+        }
+
+        public void stop() {
+            stop = true;
         }
     }
 }

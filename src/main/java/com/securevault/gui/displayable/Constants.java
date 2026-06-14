@@ -33,6 +33,8 @@ public class Constants {
     public static final int ICON_HEIGHT = 85;
     public static final int WIDTH = 900;
     public static final int HEIGHT = 700;
+    public static final int PROGRESS_WIDTH = 400;
+    public static final int PROGRESS_HEIGHT = 200;
     public static final Color FILE_NAME_COLOR = Color.CYAN;
     public static final Font FILE_NAME_FONT = new Font(Font.DIALOG_INPUT, Font.BOLD, 11);
     public static final Color PATH_LABEL_COLOR = Color.MAGENTA;

@@ -10,16 +10,22 @@ import com.securevault.gui.displayable.keys.listeners.KeyManagerListener;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.function.Consumer;
 
-public class SecureVaultGUI implements DirectoryViewManagerListener, KeyManagerListener {
+public class SecureVaultGUI implements DirectoryViewManagerListener, KeyManagerListener, WindowListener {
     private final JFrame jFrame;
     private final DirectoryViewManager directoryViewManager;
     private final KeyManager passwordManager;
     private final KeyManager apiKeyManager;
     private final Dimension dimension;
+    private Consumer<String> failedFilesListConsumer;
+    private int pendingFilesCount = 0;
+    private double progress = 0;
 
     SecureVaultGUI() {
         jFrame = new JFrame("SecureVault");
@@ -33,6 +39,7 @@ public class SecureVaultGUI implements DirectoryViewManagerListener, KeyManagerL
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.setResizable(false);
         jFrame.setLocation((windowWidth - width) >> 1, (windowHeight - height) >> 1);
+        jFrame.addWindowListener(this);
         directoryViewManager = new DirectoryViewManager(jFrame, this, dimension);
         passwordManager = new KeyManager(jFrame, this, KeyType.PASSWORD, dimension);
         apiKeyManager = new KeyManager(jFrame, this, KeyType.API_KEY, dimension);
@@ -40,7 +47,7 @@ public class SecureVaultGUI implements DirectoryViewManagerListener, KeyManagerL
         tabbedPane.add("Files", directoryViewManager.getDisplayPanel());
         tabbedPane.add("Passwords", passwordManager.getDisplayPanel());
         tabbedPane.add("APIKeys", apiKeyManager.getDisplayPanel());
-        tabbedPane.setSelectedIndex(1);
+        //tabbedPane.setSelectedIndex(1);
         JPanel contentPane = new JPanel();
         contentPane.setLayout(new BorderLayout());
         contentPane.add(tabbedPane, BorderLayout.CENTER);
@@ -54,6 +61,19 @@ public class SecureVaultGUI implements DirectoryViewManagerListener, KeyManagerL
         Pair pair = new Pair("googly.com", 0 + "@gmail.com");
         passwordManager.addKeyToView(pair);
         apiKeyManager.addKeyToView(pair);
+        Thread.startVirtualThread(() -> {
+            while (true) {
+                try {
+                    pendingFilesCount = Integer.parseInt(IO.readln("Pending: "));
+                    progress = Double.parseDouble(IO.readln("Progress: "));
+                    int n = Integer.parseInt(IO.readln("Failed count: "));
+                    for (int  i = 0; i < n; i++) {
+                        failedFilesListConsumer.accept(i+" failed to transfer due to xxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyy");
+                    }
+                } catch (Exception _) {
+                }
+            }
+        });
     }
 
     public void addFile(Path filePath) {
@@ -73,6 +93,21 @@ public class SecureVaultGUI implements DirectoryViewManagerListener, KeyManagerL
             }
         } catch (Exception _) {
         }
+    }
+
+    @Override
+    public int getNumberOfPendingFileTransfer() {
+        return pendingFilesCount;
+    }
+
+    @Override
+    public double getFileTransferProgress() {
+        return progress;
+    }
+
+    @Override
+    public void registerFailedFileTransferConsumer(Consumer<String> consumer) {
+        failedFilesListConsumer = consumer;
     }
 
     @Override
@@ -146,5 +181,34 @@ public class SecureVaultGUI implements DirectoryViewManagerListener, KeyManagerL
     @Override
     public void deleteKey(Pair pair, KeyType keyType) {
         IO.println("DELETE : " + pair + " : " + keyType);
+    }
+
+    @Override
+    public void windowOpened(WindowEvent e) {
+    }
+
+    @Override
+    public void windowClosing(WindowEvent e) {
+        directoryViewManager.shutdown();
+    }
+
+    @Override
+    public void windowClosed(WindowEvent e) {
+    }
+
+    @Override
+    public void windowIconified(WindowEvent e) {
+    }
+
+    @Override
+    public void windowDeiconified(WindowEvent e) {
+    }
+
+    @Override
+    public void windowActivated(WindowEvent e) {
+    }
+
+    @Override
+    public void windowDeactivated(WindowEvent e) {
     }
 }

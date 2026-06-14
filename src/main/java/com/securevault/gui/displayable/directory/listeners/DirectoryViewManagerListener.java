@@ -1,8 +1,15 @@
 package com.securevault.gui.displayable.directory.listeners;
 
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 public interface DirectoryViewManagerListener {
+    int getNumberOfPendingFileTransfer();
+
+    double getFileTransferProgress();
+
+    void registerFailedFileTransferConsumer(Consumer<String> consumer);
+
     void addFileToVault(Path path);
 
     void retrieveFileFromVault(Path path);
