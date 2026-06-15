@@ -1,79 +1,201 @@
 package com.securevault.gui;
 
 import com.securevault.gui.displayable.Constants;
+import com.securevault.gui.displayable.ImagePanel;
 import com.securevault.gui.displayable.directory.DirectoryViewManager;
-import com.securevault.gui.displayable.directory.listeners.DirectoryViewManagerListener;
 import com.securevault.gui.displayable.keys.KeyManager;
 import com.securevault.gui.displayable.keys.KeyType;
-import com.securevault.gui.displayable.keys.Pair;
-import com.securevault.gui.displayable.keys.listeners.KeyManagerListener;
+import com.securevault.gui.resource.ResourceManager;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.function.Consumer;
 
-public class SecureVaultGUI implements DirectoryViewManagerListener, KeyManagerListener, WindowListener {
+public class SecureVaultGUI implements WindowListener {
+    private final SecureVaultGUIListener secureVaultGUIListener;
     private final JFrame jFrame;
-    private final DirectoryViewManager directoryViewManager;
-    private final KeyManager passwordManager;
-    private final KeyManager apiKeyManager;
-    private final Dimension dimension;
-    private Consumer<String> failedFilesListConsumer;
-    private int pendingFilesCount = 0;
-    private double progress = 0;
+    private JPanel loginPanel;
+    private JPanel vaultViewPanel;
+    private JDialog showErrorDialog;
+    private DirectoryViewManager directoryViewManager;
+    private KeyManager passwordManager;
+    private KeyManager apiKeyManager;
+    private Dimension dimension;
 
-    SecureVaultGUI() {
+    SecureVaultGUI(SecureVaultGUIListener secureVaultGUIListener) {
+        this.secureVaultGUIListener = secureVaultGUIListener;
         jFrame = new JFrame("SecureVault");
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         int windowWidth = toolkit.getScreenSize().width;
         int windowHeight = toolkit.getScreenSize().height;
         int width = Constants.WIDTH;
         int height = Constants.HEIGHT;
-        dimension = new Dimension(width - 1, height);
+        dimension = new Dimension(width, height);
         jFrame.setSize(width, height);
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.setResizable(false);
         jFrame.setLocation((windowWidth - width) >> 1, (windowHeight - height) >> 1);
         jFrame.addWindowListener(this);
-        directoryViewManager = new DirectoryViewManager(jFrame, this, dimension);
-        passwordManager = new KeyManager(jFrame, this, KeyType.PASSWORD, dimension);
-        apiKeyManager = new KeyManager(jFrame, this, KeyType.API_KEY, dimension);
+        initLoginPage();
+        //initVaultViews();
+        jFrame.setContentPane(loginPanel);
+        jFrame.setVisible(true);
+    }
+
+    private JLabel getLabel(String text) {
+        JLabel jLabel = new JLabel(text);
+        jLabel.setForeground(Constants.LOGIN_PAGE_LABEL_FOREGROUND);
+        jLabel.setHorizontalAlignment(JLabel.CENTER);
+        jLabel.setVerticalAlignment(JLabel.CENTER);
+        jLabel.setHorizontalTextPosition(JLabel.CENTER);
+        jLabel.setVerticalTextPosition(JLabel.CENTER);
+        return jLabel;
+    }
+
+    private JButton getButton(String text, Color bg, Color fg, Font font, ActionListener actionListener) {
+        JButton jButton = new JButton(text);
+        jButton.addActionListener(actionListener);
+        jButton.setFocusPainted(false);
+        jButton.setBackground(bg);
+        jButton.setForeground(fg);
+        jButton.setFont(font);
+        return jButton;
+    }
+
+    private void initLoginPage() {
+        loginPanel = new ImagePanel(ResourceManager.getResource(Constants.LOGIN_PAGE_BACKGROUND_IMAGE), dimension.width, dimension.height);
+        loginPanel.setLayout(new GridLayout(0, 1));
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setApproveButtonText("Done");
+        fileChooser.setMultiSelectionEnabled(false);
+        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        JLabel vaultPathLabel = getLabel(Constants.VAULT_PATH_LABEL_MESSAGE);
+        loginPanel.add(vaultPathLabel);
+        JPanel container = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        container.setOpaque(false);
+        JTextField vaultPathField = new JTextField(30);
+        vaultPathField.setText("/home");
+        vaultPathField.setBackground(Constants.TEXT_FIELD_BACKGROUND);
+        vaultPathField.setForeground(Constants.TEXT_FIELD_FOREGROUND);
+        vaultPathField.setPreferredSize(new Dimension(50, 30));
+        vaultPathField.setFont(Constants.TEXT_FIELD_FONT);
+        JButton choosePathButton = getButton("Choose", Color.GREEN, Color.BLACK, Constants.CONFIRM_BUTTON_FONT, _ -> {
+            if (fileChooser.showOpenDialog(loginPanel) == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                if (selectedFile != null) {
+                    vaultPathField.setText(selectedFile.getPath());
+                }
+            }
+        });
+        container.add(vaultPathField);
+        container.add(choosePathButton);
+        loginPanel.add(container);
+        JLabel passwordFieldLabel = getLabel(Constants.VAULT_PASSWORD_LABEL_MESSAGE);
+        loginPanel.add(passwordFieldLabel);
+        container = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        container.setOpaque(false);
+        JPasswordField passwordField = new JPasswordField(30);
+        passwordField.setText("Hello");
+        passwordField.setBackground(Constants.TEXT_FIELD_BACKGROUND);
+        passwordField.setForeground(Constants.TEXT_FIELD_FOREGROUND);
+        passwordField.setFont(Constants.TEXT_FIELD_FONT);
+        passwordField.setPreferredSize(new Dimension(50, 30));
+        passwordField.setEchoChar('*');
+        JCheckBox showPassword = new JCheckBox("Show");
+        showPassword.setForeground(Color.CYAN);
+        showPassword.setFocusPainted(false);
+        showPassword.setOpaque(false);
+        showPassword.setSelected(false);
+        showPassword.addActionListener(_ -> {
+            if (showPassword.isSelected()) {
+                passwordField.setEchoChar('\0');
+            } else {
+                passwordField.setEchoChar('*');
+            }
+        });
+        container.add(passwordField);
+        container.add(showPassword);
+        loginPanel.add(container);
+        container = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        container.setOpaque(false);
+        JCheckBox create = new JCheckBox(Constants.VAULT_CREATE_CHECKBOX_LABEL_MESSAGE);
+        create.setForeground(Color.CYAN);
+        create.setFocusPainted(false);
+        create.setOpaque(false);
+        create.setSelected(true);
+        container.add(create);
+        loginPanel.add(container);
+        container = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        container.setOpaque(false);
+        ActionListener proceedButtonListener = _ -> {
+            try {
+                String text = vaultPathField.getText();
+                Path path = Path.of(text);
+                boolean flag = false;
+                if (text.isBlank() || !Files.isDirectory(path)) {
+                    vaultPathLabel.setText(Constants.VAULT_PATH_LABEL_ERROR_MESSAGE);
+                    flag = true;
+                } else {
+                    vaultPathLabel.setText(Constants.VAULT_PATH_LABEL_MESSAGE);
+                }
+                String password = new String(passwordField.getPassword());
+                if (password.length() < 5) {
+                    passwordFieldLabel.setText(Constants.VAULT_PASSWORD_LABEL_INVALID_MESSAGE);
+                    flag = true;
+                } else {
+                    passwordFieldLabel.setText(Constants.VAULT_PASSWORD_LABEL_MESSAGE);
+                }
+                if (flag) {
+                    return;
+                }
+                if (secureVaultGUIListener.doLogin(path, password, create.isSelected())) {
+                    initVaultViewsAndShow();
+                }
+            } catch (Exception _) {
+            }
+        };
+        JButton proceed = getButton("Create", Constants.CANCEL_BUTTON_BACKGROUND, Constants.CANCEL_BUTTON_FOREGROUND, Constants.CANCEL_BUTTON_FONT, proceedButtonListener);
+        create.addActionListener(_ -> {
+            if (create.isSelected()) {
+                proceed.setText("Create");
+            } else {
+                proceed.setText("Open");
+            }
+        });
+        proceed.setPreferredSize(new Dimension(100, 30));
+        container.add(proceed);
+        loginPanel.add(container);
+    }
+
+    private void initVaultViewsAndShow() {
+        directoryViewManager = new DirectoryViewManager(jFrame, secureVaultGUIListener, dimension);
+        passwordManager = new KeyManager(jFrame, secureVaultGUIListener, KeyType.PASSWORD, dimension);
+        apiKeyManager = new KeyManager(jFrame, secureVaultGUIListener, KeyType.API_KEY, dimension);
         JTabbedPane tabbedPane = new JTabbedPane(SwingConstants.TOP, JTabbedPane.SCROLL_TAB_LAYOUT);
         tabbedPane.add("Files", directoryViewManager.getDisplayPanel());
         tabbedPane.add("Passwords", passwordManager.getDisplayPanel());
         tabbedPane.add("APIKeys", apiKeyManager.getDisplayPanel());
         //tabbedPane.setSelectedIndex(1);
-        JPanel contentPane = new JPanel();
-        contentPane.setLayout(new BorderLayout());
-        contentPane.add(tabbedPane, BorderLayout.CENTER);
-        jFrame.setContentPane(contentPane);
-        jFrame.setVisible(true);
-        for (int i = 0; i <= 100; i++) {
-            Pair pair = new Pair("googly.com", i + "@gmail.com");
-            passwordManager.addKeyToView(pair);
-            apiKeyManager.addKeyToView(pair);
-        }
-        Pair pair = new Pair("googly.com", 0 + "@gmail.com");
-        passwordManager.addKeyToView(pair);
-        apiKeyManager.addKeyToView(pair);
-        Thread.startVirtualThread(() -> {
-            while (true) {
-                try {
-                    pendingFilesCount = Integer.parseInt(IO.readln("Pending: "));
-                    progress = Double.parseDouble(IO.readln("Progress: "));
-                    int n = Integer.parseInt(IO.readln("Failed count: "));
-                    for (int  i = 0; i < n; i++) {
-                        failedFilesListConsumer.accept(i+" failed to transfer due to xxxxxxxxxxxxxxxxxxxxxyyyyyyyyyyyy");
-                    }
-                } catch (Exception _) {
-                }
-            }
-        });
+        vaultViewPanel = new JPanel();
+        vaultViewPanel.setLayout(new BorderLayout());
+        vaultViewPanel.add(tabbedPane, BorderLayout.CENTER);
+        directoryViewManager.addFiles(secureVaultGUIListener.getFilesList());
+        passwordManager.addKeysToView(secureVaultGUIListener.getKeysList(KeyType.PASSWORD));
+        apiKeyManager.addKeysToView(secureVaultGUIListener.getKeysList(KeyType.API_KEY));
+        jFrame.setContentPane(vaultViewPanel);
+    }
+
+    public void showLoginPage() {
+        jFrame.setContentPane(loginPanel);
+    }
+
+    private void showVaultView() {
     }
 
     public void addFile(Path filePath) {
@@ -84,112 +206,15 @@ public class SecureVaultGUI implements DirectoryViewManagerListener, KeyManagerL
         directoryViewManager.addFiles(files);
     }
 
-    private void addFilesRecursively(Path path, Path removePath) {
-        try {
-            if (Files.isDirectory(path)) {
-                Files.list(path).forEach(subPath -> addFilesRecursively(subPath, removePath));
-            } else if (Files.isRegularFile(path)) {
-                addFile(removePath.relativize(path));
-            }
-        } catch (Exception _) {
-        }
-    }
-
-    @Override
-    public int getNumberOfPendingFileTransfer() {
-        return pendingFilesCount;
-    }
-
-    @Override
-    public double getFileTransferProgress() {
-        return progress;
-    }
-
-    @Override
-    public void registerFailedFileTransferConsumer(Consumer<String> consumer) {
-        failedFilesListConsumer = consumer;
-    }
-
-    @Override
-    public void addFileToVault(Path filePath) {
-        IO.println("ADD: " + filePath);
-    }
-
-    @Override
-    public void retrieveFileFromVault(Path path) {
-        IO.println("Retrieve: " + path);
-    }
-
-    @Override
-    public void deleteFileFromVault(Path path) {
-        IO.println("Delete: " + path);
-        directoryViewManager.deleteFile(path);
-    }
-
-    @Override
-    public void renameFileFromVault(Path path, String newName) {
-        IO.println("Rename :" + path + " => " + newName);
-    }
-
-    @Override
-    public void close() {
-        IO.println("Close");
-    }
-
-    @Override
-    public void lockdown(long duration) {
-        IO.println("Lockdown: " + duration);
-    }
-
-    @Override
-    public boolean isSelfDestructEnabled() {
-        return false;
-    }
-
-    @Override
-    public int getSelfDestructTries() {
-        return 0;
-    }
-
-    @Override
-    public void setSelfDestruct(int tries) {
-        IO.println("Tries: " + tries);
-    }
-
-    @Override
-    public void disableSelfDestruct() {
-        IO.println("Disable");
-    }
-
-    @Override
-    public void selfDestructVault(String password) {
-        IO.println("Destroy: " + password);
-        throw new RuntimeException();
-    }
-
-    @Override
-    public void addKey(Pair pair, String value, KeyType keyType) {
-        IO.println("ADD : " + pair + " : " + value + " : " + keyType);
-    }
-
-    @Override
-    public String getKey(Pair pair, KeyType keyType) {
-        IO.println("GET : " + pair + " : " + keyType);
-        return "Hello";
-    }
-
-    @Override
-    public void deleteKey(Pair pair, KeyType keyType) {
-        IO.println("DELETE : " + pair + " : " + keyType);
-    }
-
     @Override
     public void windowOpened(WindowEvent e) {
     }
 
     @Override
     public void windowClosing(WindowEvent e) {
-        directoryViewManager.shutdown();
+        if (directoryViewManager != null) {
+            directoryViewManager.shutdown();
+        }
     }
 
     @Override

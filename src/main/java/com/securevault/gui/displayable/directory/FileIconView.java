@@ -18,9 +18,9 @@ public class FileIconView extends MouseAdapter {
     private final JPanel jPanel;
     private final JPanel iconPanel;
     private final JLabel fileNameLabel;
-    private String fileName;
     private final boolean directory;
     private final FileIconViewEventListener fileIconViewEventListener;
+    private String fileName;
     private boolean borderSet;
 
     public FileIconView(String fileName, boolean directory, FileIconViewEventListener fileIconViewEventListener) {

@@ -11,6 +11,7 @@ import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.Semaphore;
@@ -191,6 +192,10 @@ public class KeyManager implements KeyViewListener {
 
     public void addKeyToView(Pair pair) {
         addKeyToView0(pair);
+    }
+
+    public void addKeysToView(List<Pair> pairs) {
+        pairs.forEach(this::addKeyToView0);
     }
 
     private void deleteKeyFromView0(Pair pair) {

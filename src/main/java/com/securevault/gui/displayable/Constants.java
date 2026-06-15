@@ -5,6 +5,13 @@ import javax.swing.border.SoftBevelBorder;
 import java.awt.*;
 
 public class Constants {
+    public static final String LOGIN_PAGE_BACKGROUND_IMAGE = "background_images/background.jpg";
+    public static final String VAULT_PATH_LABEL_MESSAGE = "<html>Enter the vault path:</html>";
+    public static final String VAULT_PATH_LABEL_ERROR_MESSAGE = "<html>Enter the vault path: (Invalid path)</html>";
+    public static final String VAULT_PASSWORD_LABEL_MESSAGE = "<html>Enter the vault password:</html>";
+    public static final String VAULT_PASSWORD_LABEL_INVALID_MESSAGE = "<html>Enter the vault password: (Password must me at least 5 characters long)</html>";
+    public static final String VAULT_CREATE_CHECKBOX_LABEL_MESSAGE = "<html>You want to create the vault?</html>";
+    public static final Color LOGIN_PAGE_LABEL_FOREGROUND = Color.CYAN;
     public static final String FILES_VIEW_BACKGROUND_IMAGE = "background_images/background.jpg";
     public static final String KEYS_VIEW_BACKGROUND_IMAGE = "background_images/background.jpg";
     public static final int BACK_BUTTON_WIDTH = 50;
@@ -75,7 +82,7 @@ public class Constants {
     public static final Color PASSWORD_VIEW_FIELD_BACKGROUND = KEY_VIEW_BACKGROUND.brighter().brighter();
     public static final Color PASSWORD_VIEW_FIELD_FOREGROUND = Color.BLACK;
     public static final Font PASSWORD_VIEW_FIELD_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
-    public static final Color SHOW_PASSWORD_BUTTON_BACKGROUND =KEY_VIEW_BACKGROUND.brighter().brighter();
+    public static final Color SHOW_PASSWORD_BUTTON_BACKGROUND = KEY_VIEW_BACKGROUND.brighter().brighter();
     public static final Color SHOW_PASSWORD_BUTTON_FOREGROUND = Color.CYAN;
     public static final Font SHOW_PASSWORD_BUTTON_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
     public static final Color COPY_BUTTON_BACKGROUND = KEY_VIEW_BACKGROUND.brighter().brighter();

@@ -21,11 +21,11 @@ public class DirectoryView implements FileIconViewEventListener {
     private final TreeMap<String, DirectoryView> directories = new TreeMap<>();
     private final TreeSet<String> files = new TreeSet<>();
     private final Map<String, FileIconView> fileIconViewMap = new HashMap<>();
-    private String directoryName;
     private final DirectoryView parentDirectoryView;
     private final DirectoryViewListener directoryViewListener;
     private final Semaphore lock = new Semaphore(1, true);
     private final JPanel displayComponent;
+    private String directoryName;
     private volatile boolean uiChanged;
     private FileIconView lastSelectedFileIconView = new FileIconView("", false, this);
 
@@ -63,12 +63,12 @@ public class DirectoryView implements FileIconViewEventListener {
         lock.release();
     }
 
-    public void setDirectoryName(String newName) {
-        directoryName = newName;
-    }
-
     public String getDirectoryName() {
         return directoryName;
+    }
+
+    public void setDirectoryName(String newName) {
+        directoryName = newName;
     }
 
     private void manageAction(DirectoryViewAction action) {

@@ -19,6 +19,7 @@ import java.util.regex.Pattern;
 import static com.securevault.gui.displayable.Constants.*;
 
 public class DirectoryViewManager implements DirectoryViewListener {
+    private static final Path SKIP = Path.of("root");
     private final JFrame windowFrame;
     private final JPopupMenu settingPopupMenu = new JPopupMenu("Setting");
     private final DirectoryViewManagerListener directoryViewManagerListener;
@@ -40,7 +41,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
     private JLabel destroyVaultPasswordLabel;
     private JPasswordField destroyVaultPasswordField;
     private JDialog selfDestructStatusDialog;
-    private JToggleButton selfDestructEnabled;
+    private JCheckBox selfDestructEnabled;
     private JLabel selfDestructTriesLabel;
     private JTextField selfDestructTriesTextField;
     private volatile DirectoryView currentDirectoryView;
@@ -346,7 +347,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
         valuePanel.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
         JLabel label = getMessageLabel(SELF_DESTRUCT_TOGGLE_BUTTON_LABEL_MESSAGE);
         valuePanel.add(label);
-        selfDestructEnabled = new JToggleButton();
+        selfDestructEnabled = new JCheckBox();
         selfDestructEnabled.setFocusPainted(false);
         selfDestructEnabled.addActionListener(_ -> updateValuesAccordingToSelfDestructToggleButton());
         selfDestructEnabled.setForeground(Color.BLACK);
@@ -597,6 +598,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
             case DELETE -> {
                 try {
                     directoryViewManagerListener.deleteFileFromVault(filePath);
+                    deleteFile(filePath);
                     DirectoryView directoryView = rootDirectoryView;
                     String[] paths = splitPath(filePath);
                     int n = paths.length - 1;
@@ -627,10 +629,10 @@ public class DirectoryViewManager implements DirectoryViewListener {
         private final ConcurrentLinkedQueue<String> failedTransferFileMessages = new ConcurrentLinkedQueue<>();
         private final JFrame jFrame;
         private final JDialog jDialog;
+        private final JPanel jPanel;
         private JDialog failedFileDialog;
         private JPanel failedFilesPanel;
         private JLabel failedFilesListLabel;
-        private final JPanel jPanel;
         private JPanel progressPanel;
         private JLabel progressLabel;
         private JProgressBar jProgressBar;
