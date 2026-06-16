@@ -37,7 +37,7 @@ public class SecureVaultGUI implements WindowListener {
     private KeyManager passwordManager;
     private KeyManager apiKeyManager;
 
-    SecureVaultGUI(SecureVaultGUIListener secureVaultGUIListener) {
+    public SecureVaultGUI(SecureVaultGUIListener secureVaultGUIListener) {
         this.secureVaultGUIListener = secureVaultGUIListener;
         jFrame = new JFrame("SecureVault");
         Toolkit toolkit = Toolkit.getDefaultToolkit();
