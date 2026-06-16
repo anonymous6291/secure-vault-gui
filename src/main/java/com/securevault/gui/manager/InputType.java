@@ -1,4 +1,4 @@
-package com.securevault.gui;
+package com.securevault.gui.manager;
 
 public enum InputType {
     ERROR,

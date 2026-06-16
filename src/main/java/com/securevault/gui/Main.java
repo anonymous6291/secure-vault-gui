@@ -2,6 +2,8 @@ package com.securevault.gui;
 
 import com.securevault.gui.displayable.keys.KeyType;
 import com.securevault.gui.displayable.keys.Pair;
+import com.securevault.gui.manager.SecureVaultGUI;
+import com.securevault.gui.manager.SecureVaultGUIListener;
 
 import javax.swing.*;
 import java.nio.file.Files;
@@ -41,7 +43,8 @@ public class Main implements SecureVaultGUIListener {
                     }
                 }
             });
-           IO.println("Response: "+ secureVaultGUI.askForQuery("File hello already exists.", List.of("RENAME","RENAME_ALL","SKIP","SKIP_ALL","REPLACE","REPLACE_ALL")));
+           secureVaultGUI.showErrorDialog("Error occurred.");
+            IO.println("Response: "+ secureVaultGUI.askForQuery("File hello already exists.", List.of("RENAME","RENAME_ALL","SKIP","SKIP_ALL","REPLACE","REPLACE_ALL")));
         } catch (Exception e) {
             e.printStackTrace();
         }

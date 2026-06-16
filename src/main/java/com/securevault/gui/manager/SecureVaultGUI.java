@@ -1,4 +1,4 @@
-package com.securevault.gui;
+package com.securevault.gui.manager;
 
 import com.securevault.gui.displayable.Constants;
 import com.securevault.gui.displayable.ImagePanel;
@@ -24,14 +24,15 @@ public class SecureVaultGUI implements WindowListener {
     private final JFrame jFrame;
     private final Dimension dimension;
     private volatile CompletableFuture<String> optionQuery = null;
-    private final Semaphore queryLock = new Semaphore(1, true);
+    private final Semaphore dialogLock = new Semaphore(1, true);
     private JPanel loginPanel;
     private JPanel vaultViewPanel;
     private JDialog optionDialog;
     private JLabel optionDialogMessageLabel;
     private JComboBox<String> optionDialogOptions;
     private JButton optionDialogButton;
-    private JDialog showErrorDialog;
+    private JDialog errorDialog;
+    private JLabel errorDialogLabel;
     private DirectoryViewManager directoryViewManager;
     private KeyManager passwordManager;
     private KeyManager apiKeyManager;
@@ -51,6 +52,7 @@ public class SecureVaultGUI implements WindowListener {
         jFrame.setLocation((windowWidth - width) >> 1, (windowHeight - height) >> 1);
         jFrame.addWindowListener(this);
         initOptionDialog();
+        initErrorDialog();
         initLoginPage();
         //initVaultViews();
         jFrame.setContentPane(loginPanel);
@@ -68,7 +70,7 @@ public class SecureVaultGUI implements WindowListener {
     }
 
     private JLabel getLoginPageLabel(String text) {
-        return getLabel(text,Constants.LOGIN_PAGE_LABEL_FOREGROUND);
+        return getLabel(text, Constants.LOGIN_PAGE_LABEL_FOREGROUND);
     }
 
     private JButton getButton(String text, Color bg, Color fg, Font font, ActionListener actionListener) {
@@ -204,6 +206,7 @@ public class SecureVaultGUI implements WindowListener {
         jPanel.add(optionDialogMessageLabel);
         jPanel.add(getLabel("<html>Select one of the options:</html>", Constants.SETTING_SUBMENU_DIALOG_FOREGROUND));
         optionDialogOptions = new JComboBox<>();
+        optionDialogOptions.setFocusable(false);
         optionDialogOptions.setOpaque(false);
         optionDialogOptions.setFont(Constants.SETTING_SUBMENU_DIALOG_FONT);
         optionDialogOptions.setBackground(new Color(0xD315D3));
@@ -219,11 +222,29 @@ public class SecureVaultGUI implements WindowListener {
             Object selectedItem = optionDialogOptions.getSelectedItem();
             optionQuery.complete(selectedItem == null ? "" : selectedItem.toString());
             optionDialog.setVisible(false);
+            dialogLock.release();
         };
         optionDialogButton = getButton("Proceed", Constants.CANCEL_BUTTON_BACKGROUND, Constants.CANCEL_BUTTON_FOREGROUND, Constants.CANCEL_BUTTON_FONT, actionListener);
         container.add(optionDialogButton);
         jPanel.add(container);
         optionDialog.setContentPane(jPanel);
+    }
+
+    private void initErrorDialog() {
+        errorDialog = getJDialog("Error", Constants.SETTING_SUBMENU_DIALOG_WIDTH, Constants.SETTING_SUBMENU_DIALOG_HEIGHT, JDialog.HIDE_ON_CLOSE);
+        JPanel jPanel = new JPanel(new GridLayout(0, 1));
+        jPanel.setBackground(Constants.SETTING_SUBMENU_DIALOG_BACKGROUND);
+        errorDialogLabel = getLabel("", Constants.SETTING_SUBMENU_DIALOG_FOREGROUND);
+        jPanel.add(errorDialogLabel);
+        JPanel container = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        container.setOpaque(false);
+        JButton jButton = getButton("Ok", Constants.CANCEL_BUTTON_BACKGROUND, Constants.CANCEL_BUTTON_FOREGROUND, Constants.CANCEL_BUTTON_FONT, _ -> {
+            errorDialog.setVisible(false);
+            dialogLock.release();
+        });
+        container.add(jButton);
+        jPanel.add(container);
+        errorDialog.setContentPane(jPanel);
     }
 
     private void initVaultViewsAndShow() {
@@ -248,17 +269,9 @@ public class SecureVaultGUI implements WindowListener {
         jFrame.setContentPane(loginPanel);
     }
 
-    public void addFile(Path filePath) {
-        directoryViewManager.addFile(filePath);
-    }
-
-    public void addFiles(List<Path> files) {
-        directoryViewManager.addFiles(files);
-    }
-
     public String askForQuery(String query, List<String> options) {
         try {
-            queryLock.acquire();
+            dialogLock.acquire();
         } catch (InterruptedException _) {
         }
         try {
@@ -272,9 +285,24 @@ public class SecureVaultGUI implements WindowListener {
             return optionQuery.get();
         } catch (Exception e) {
             return "";
-        } finally {
-            queryLock.release();
         }
+    }
+
+    public void showErrorDialog(String message) {
+        try {
+            dialogLock.acquire();
+        } catch (Exception _) {
+        }
+        errorDialogLabel.setText("<html>" + message + "</html>");
+        errorDialog.setVisible(true);
+    }
+
+    public void addFile(Path filePath) {
+        directoryViewManager.addFile(filePath);
+    }
+
+    public void addFiles(List<Path> files) {
+        directoryViewManager.addFiles(files);
     }
 
     @Override

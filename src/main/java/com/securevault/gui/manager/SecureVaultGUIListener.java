@@ -1,4 +1,4 @@
-package com.securevault.gui;
+package com.securevault.gui.manager;
 
 import com.securevault.gui.displayable.directory.listeners.DirectoryViewManagerListener;
 import com.securevault.gui.displayable.keys.KeyType;
