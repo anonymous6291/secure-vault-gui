@@ -407,7 +407,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
     }
 
     private void addFile0(Path path) {
-        DirectoryView current = currentDirectoryView;
+        DirectoryView current = rootDirectoryView;
         String[] split = splitPath(path);
         int n = split.length - 1;
         for (int i = 0; i < n; i++) {
@@ -424,7 +424,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
         files.forEach(this::addFile0);
     }
 
-    public void deleteFile(Path path) {
+    private void deleteFile0(Path path) {
         String[] paths = splitPath(path);
         DirectoryView directoryView = rootDirectoryView;
         int n = paths.length - 1;
@@ -435,6 +435,10 @@ public class DirectoryViewManager implements DirectoryViewListener {
             }
         }
         directoryView.deleteFile(paths[n]);
+    }
+
+    public void deleteFile(Path path) {
+        deleteFile0(path);
     }
 
     public void back() {
@@ -587,7 +591,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
                     if (fileChooser.showDialog(displayPanel, null) == JFileChooser.APPROVE_OPTION) {
                         File[] selectedFiles = fileChooser.getSelectedFiles();
                         if (selectedFiles != null) {
-                            Arrays.stream(selectedFiles).forEach(x -> directoryViewManagerListener.addFileToVault(x.toPath()));
+                            Arrays.stream(selectedFiles).forEach(x -> directoryViewManagerListener.addFileToVault(x.toPath(), currentDirectoryView.getPath()));
                         }
                     }
                 } catch (Exception e) {

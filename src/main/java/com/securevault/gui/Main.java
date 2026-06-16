@@ -41,6 +41,7 @@ public class Main implements SecureVaultGUIListener {
                     }
                 }
             });
+           IO.println("Response: "+ secureVaultGUI.askForQuery("File hello already exists.", List.of("RENAME","RENAME_ALL","SKIP","SKIP_ALL","REPLACE","REPLACE_ALL")));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -73,8 +74,11 @@ public class Main implements SecureVaultGUIListener {
     }
 
     @Override
-    public void addFileToVault(Path filePath) {
-        IO.println("ADD: " + filePath);
+    public void addFileToVault(Path from, Path to) {
+        IO.println("ADD: " + from + " : " + to);
+        List<Path> list = new ArrayList<>();
+        recursiveList(from,from,list);
+        secureVaultGUI.addFiles(list);
     }
 
     @Override

@@ -10,7 +10,7 @@ public interface DirectoryViewManagerListener {
 
     void registerFailedFileTransferConsumer(Consumer<String> consumer);
 
-    void addFileToVault(Path path);
+    void addFileToVault(Path from, Path to);
 
     void retrieveFileFromVault(Path path);
 
