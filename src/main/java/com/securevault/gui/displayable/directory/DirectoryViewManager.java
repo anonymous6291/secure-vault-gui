@@ -2,6 +2,7 @@ package com.securevault.gui.displayable.directory;
 
 import com.securevault.gui.displayable.Constants;
 import com.securevault.gui.displayable.ImagePanel;
+import com.securevault.gui.displayable.JDialogDisplayer;
 import com.securevault.gui.displayable.directory.listeners.DirectoryViewListener;
 import com.securevault.gui.displayable.directory.listeners.DirectoryViewManagerListener;
 import com.securevault.gui.resource.ResourceManager;
@@ -470,7 +471,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
     }
 
     private void manageSettingMenu(JDialog jDialog) {
-        jDialog.setVisible(true);
+        JDialogDisplayer.display(jDialog);
     }
 
     private void closeVault() {
@@ -597,7 +598,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
                     IO.println(e);
                 }
             }
-            case RETRIEVE -> directoryViewManagerListener.retrieveFileFromVault(filePath);
+            case RETRIEVE -> directoryViewManagerListener.retrieveFileFromVault(filePath, Path.of(""));
             case DELETE -> {
                 try {
                     directoryViewManagerListener.deleteFileFromVault(filePath);
@@ -621,7 +622,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
                 targetRenameFile.setText(filePathString);
                 targetRenameFile.setCaretPosition(filePathString.length());
                 renameFileNewName.setText("");
-                renameFileDialog.setVisible(true);
+                JDialogDisplayer.display(renameFileDialog);
             }
         }
     }
@@ -720,7 +721,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
                 stringBuilder.append(failedTransferFileMessages.poll()).append("<br>");
             }
             failedFilesListLabel.setText(stringBuilder.append("</html>").toString());
-            failedFileDialog.setVisible(true);
+            JDialogDisplayer.display(failedFileDialog);
         }
 
         public void run() {
@@ -754,13 +755,13 @@ public class DirectoryViewManager implements DirectoryViewListener {
                 if (progressPanelAdded && failedFilePanelAdded) {
                     if (h != PROGRESS_HEIGHT) {
                         jDialog.setSize(PROGRESS_WIDTH, h = PROGRESS_HEIGHT);
-                        jDialog.setVisible(true);
+                        JDialogDisplayer.display(jDialog);
                         setLocation();
                     }
                 } else if (progressPanelAdded || failedFilePanelAdded) {
                     if (h != (PROGRESS_HEIGHT >> 1)) {
                         jDialog.setSize(PROGRESS_WIDTH, h = PROGRESS_HEIGHT >> 1);
-                        jDialog.setVisible(true);
+                        JDialogDisplayer.display(jDialog);
                         setLocation();
                     }
                 } else {

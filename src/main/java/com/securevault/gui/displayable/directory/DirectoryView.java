@@ -39,8 +39,16 @@ public class DirectoryView implements FileIconViewEventListener {
         directoryViewPopupMenu.add(getMenuItem("Add Files", DirectoryViewAction.ADD));
         filePopupMenu.add(getMenuItem("Retrieve", DirectoryViewAction.RETRIEVE));
         filePopupMenu.add(getMenuItem("Delete", DirectoryViewAction.DELETE));
-        filePopupMenu.add(getMenuItem("Rename", DirectoryViewAction.RENAME));
+        //filePopupMenu.add(getMenuItem("Rename", DirectoryViewAction.RENAME));
         filePopupMenu.add(getMenuItem("Add Files", DirectoryViewAction.ADD));
+        displayComponent.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    directoryViewPopupMenu.show(displayComponent, e.getX(), e.getY());
+                }
+            }
+        });
     }
 
     private JMenuItem getMenuItem(String label, DirectoryViewAction action) {

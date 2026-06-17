@@ -1,16 +1,10 @@
 package com.securevault.gui;
 
-import com.securevault.gui.displayable.keys.KeyType;
-import com.securevault.gui.displayable.keys.Pair;
 import com.securevault.gui.manager.SecureVaultGUI;
-import com.securevault.gui.manager.SecureVaultGUIListener;
 import com.securevault.gui.manager.SecureVaultManager;
 
-import javax.swing.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Consumer;
 

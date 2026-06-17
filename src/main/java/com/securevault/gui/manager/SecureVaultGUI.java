@@ -2,6 +2,7 @@ package com.securevault.gui.manager;
 
 import com.securevault.gui.displayable.Constants;
 import com.securevault.gui.displayable.ImagePanel;
+import com.securevault.gui.displayable.JDialogDisplayer;
 import com.securevault.gui.displayable.directory.DirectoryViewManager;
 import com.securevault.gui.displayable.keys.KeyManager;
 import com.securevault.gui.displayable.keys.KeyType;
@@ -95,7 +96,7 @@ public class SecureVaultGUI implements WindowListener {
         JPanel container = new JPanel(new FlowLayout(FlowLayout.CENTER));
         container.setOpaque(false);
         JTextField vaultPathField = new JTextField(30);
-        vaultPathField.setText("/home");
+        vaultPathField.setText("/home/anonymous/Desktop/SecureVaultData/");
         vaultPathField.setBackground(Constants.TEXT_FIELD_BACKGROUND);
         vaultPathField.setForeground(Constants.TEXT_FIELD_FOREGROUND);
         vaultPathField.setPreferredSize(new Dimension(50, 30));
@@ -116,7 +117,7 @@ public class SecureVaultGUI implements WindowListener {
         container = new JPanel(new FlowLayout(FlowLayout.CENTER));
         container.setOpaque(false);
         JPasswordField passwordField = new JPasswordField(30);
-        passwordField.setText("Hello");
+        passwordField.setText("hello");
         passwordField.setBackground(Constants.TEXT_FIELD_BACKGROUND);
         passwordField.setForeground(Constants.TEXT_FIELD_FOREGROUND);
         passwordField.setFont(Constants.TEXT_FIELD_FONT);
@@ -143,7 +144,7 @@ public class SecureVaultGUI implements WindowListener {
         create.setForeground(Color.CYAN);
         create.setFocusPainted(false);
         create.setOpaque(false);
-        create.setSelected(true);
+        create.setSelected(false);
         container.add(create);
         loginPanel.add(container);
         container = new JPanel(new FlowLayout(FlowLayout.CENTER));
@@ -281,7 +282,7 @@ public class SecureVaultGUI implements WindowListener {
             options.forEach(optionDialogOptions::addItem);
             optionDialog.validate();
             optionDialog.repaint();
-            optionDialog.setVisible(true);
+            JDialogDisplayer.display(optionDialog);
             return optionQuery.get();
         } catch (Exception e) {
             return "";
@@ -294,7 +295,10 @@ public class SecureVaultGUI implements WindowListener {
         } catch (Exception _) {
         }
         errorDialogLabel.setText("<html>" + message + "</html>");
-        errorDialog.setVisible(true);
+        errorDialog.validate();
+        errorDialog.repaint();
+        JDialogDisplayer.display(errorDialog);
+        IO.println("Exit");
     }
 
     public void addFile(Path filePath) {

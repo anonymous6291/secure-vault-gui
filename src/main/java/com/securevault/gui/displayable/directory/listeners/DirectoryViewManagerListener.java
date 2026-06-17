@@ -12,7 +12,7 @@ public interface DirectoryViewManagerListener {
 
     void addFileToVault(Path from, Path to);
 
-    void retrieveFileFromVault(Path path);
+    void retrieveFileFromVault(Path from, Path to);
 
     void deleteFileFromVault(Path path);
 

@@ -12,15 +12,15 @@ import static com.securevault.gui.displayable.Constants.*;
 
 public class KeyView extends MouseAdapter {
     private static final String HIDDEN_PASSWORD_TEXT = "**********";
-    private final Pair pair;
+    private final WebsiteIdPair websiteIdPair;
     private final KeyViewListener keyViewListener;
     private final JPanel view;
     private final JTextField password;
     private final JButton showButton;
     private volatile boolean isPasswordVisible;
 
-    KeyView(Pair pair, KeyViewListener keyViewListener) {
-        this.pair = pair;
+    KeyView(WebsiteIdPair websiteIdPair, KeyViewListener keyViewListener) {
+        this.websiteIdPair = websiteIdPair;
         this.keyViewListener = keyViewListener;
         view = new JPanel(new GridLayout(0, 1));
         view.setBorder(KEY_VIEW_BORDER);
@@ -28,8 +28,8 @@ public class KeyView extends MouseAdapter {
         view.setBackground(KEY_VIEW_BACKGROUND);
         view.addMouseListener(this);
         removeBorder();
-        view.add(getLabel("Website:   " + pair.websiteName()));
-        view.add(getLabel("ID:   " + pair.id()));
+        view.add(getLabel("Website:   " + websiteIdPair.websiteName()));
+        view.add(getLabel("ID:   " + websiteIdPair.id()));
         JPanel passwordViewPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
         passwordViewPanel.setOpaque(false);
         password = new JTextField(HIDDEN_PASSWORD_TEXT, 15);
@@ -71,8 +71,8 @@ public class KeyView extends MouseAdapter {
         return view;
     }
 
-    public Pair getPair() {
-        return pair;
+    public WebsiteIdPair getPair() {
+        return websiteIdPair;
     }
 
     private void showPasswordButtonPressed() {
@@ -81,7 +81,7 @@ public class KeyView extends MouseAdapter {
             password.setText(HIDDEN_PASSWORD_TEXT);
         } else {
             showButton.setText("Hide");
-            password.setText(keyViewListener.getValue(pair));
+            password.setText(keyViewListener.getValue(websiteIdPair));
         }
         isPasswordVisible = !isPasswordVisible;
     }

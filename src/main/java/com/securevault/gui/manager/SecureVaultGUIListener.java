@@ -2,7 +2,7 @@ package com.securevault.gui.manager;
 
 import com.securevault.gui.displayable.directory.listeners.DirectoryViewManagerListener;
 import com.securevault.gui.displayable.keys.KeyType;
-import com.securevault.gui.displayable.keys.Pair;
+import com.securevault.gui.displayable.keys.WebsiteIdPair;
 import com.securevault.gui.displayable.keys.listeners.KeyManagerListener;
 
 import java.nio.file.Path;
@@ -15,5 +15,5 @@ public interface SecureVaultGUIListener extends DirectoryViewManagerListener, Ke
 
     List<Path> getFilesList();
 
-    List<Pair> getKeysList(KeyType keyType);
+    List<WebsiteIdPair> getKeysList(KeyType keyType);
 }

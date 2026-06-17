@@ -1,6 +1,7 @@
 package com.securevault.gui.displayable.keys;
 
 import com.securevault.gui.displayable.ImagePanel;
+import com.securevault.gui.displayable.JDialogDisplayer;
 import com.securevault.gui.displayable.WrapLayout;
 import com.securevault.gui.displayable.keys.listeners.KeyManagerListener;
 import com.securevault.gui.displayable.keys.listeners.KeyViewListener;
@@ -24,10 +25,10 @@ public class KeyManager implements KeyViewListener {
     private final KeyType keyType;
     private final JPanel displayPanel;
     private final Semaphore lock = new Semaphore(1, true);
-    private final Map<Pair, KeyView> keyViewMap = new TreeMap<>();
+    private final Map<WebsiteIdPair, KeyView> keyViewMap = new TreeMap<>();
     private final JPopupMenu addPopupMenu;
     private final JPopupMenu allPopupMenu;
-    private volatile KeyView currentKeyView = new KeyView(new Pair("", ""), null);
+    private volatile KeyView currentKeyView = new KeyView(new WebsiteIdPair("", ""), null);
     private JDialog addOrEditKeyDialog;
     private JTextField addOrEditDialogWebsiteField;
     private JLabel addOrEditDialogWebsiteFieldLabel;
@@ -54,8 +55,14 @@ public class KeyManager implements KeyViewListener {
         allPopupMenu.add(getMenuItem("Delete Key", _ -> displayDeleteKeyDialog()));
         initAddOrEditDialog();
         initDeleteDialog();
-        if (keyType == KeyType.API_KEY)
-            addOrEditKeyDialog.setVisible(false);
+        displayPanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON3) {
+                    addPopupMenu.show(displayPanel, e.getX(), e.getY());
+                }
+            }
+        });
     }
 
     private JMenuItem getMenuItem(String name, ActionListener actionListener) {
@@ -183,30 +190,30 @@ public class KeyManager implements KeyViewListener {
         lock.release();
     }
 
-    private void addKeyToView0(Pair pair) {
+    private void addKeyToView0(WebsiteIdPair websiteIdPair) {
         setLock();
-        keyViewMap.put(pair, new KeyView(pair, this));
+        keyViewMap.put(websiteIdPair, new KeyView(websiteIdPair, this));
         unlock();
         updateUI();
     }
 
-    public void addKeyToView(Pair pair) {
-        addKeyToView0(pair);
+    public void addKeyToView(WebsiteIdPair websiteIdPair) {
+        addKeyToView0(websiteIdPair);
     }
 
-    public void addKeysToView(List<Pair> pairs) {
-        pairs.forEach(this::addKeyToView0);
+    public void addKeysToView(List<WebsiteIdPair> websiteIdPairs) {
+        websiteIdPairs.forEach(this::addKeyToView0);
     }
 
-    private void deleteKeyFromView0(Pair pair) {
+    private void deleteKeyFromView0(WebsiteIdPair websiteIdPair) {
         setLock();
-        keyViewMap.remove(pair);
+        keyViewMap.remove(websiteIdPair);
         unlock();
         updateUI();
     }
 
-    public void deleteKeyFromView(Pair pair) {
-        deleteKeyFromView0(pair);
+    public void deleteKeyFromView(WebsiteIdPair websiteIdPair) {
+        deleteKeyFromView0(websiteIdPair);
     }
 
     private void updateUI() {
@@ -264,26 +271,26 @@ public class KeyManager implements KeyViewListener {
         if (flag) {
             return;
         }
-        Pair pair = new Pair(websiteName, id);
+        WebsiteIdPair websiteIdPair = new WebsiteIdPair(websiteName, id);
         if (addMode) {
-            if (keyViewMap.containsKey(pair)) {
+            if (keyViewMap.containsKey(websiteIdPair)) {
                 addOrEditDialogIdFieldLabel.setText(ID_FIELD_EXISTS_MESSAGE);
                 return;
             }
             addOrEditDialogIdFieldLabel.setText(ID_FIELD_MESSAGE);
-            addKeyToView(pair);
+            addKeyToView(websiteIdPair);
         } else {
-            keyManagerListener.deleteKey(pair, keyType);
+            keyManagerListener.deleteKey(websiteIdPair, keyType);
         }
-        keyManagerListener.addKey(pair, value, keyType);
+        keyManagerListener.addKey(websiteIdPair, value, keyType);
         addOrEditKeyDialog.setVisible(false);
         addOrEditDialogValueField.setText("");
     }
 
     private void deleteConfirmButtonPressed() {
-        Pair pair = new Pair(deleteDialogWebsiteField.getText(), deleteDialogIdField.getText());
-        keyManagerListener.deleteKey(pair, keyType);
-        deleteKeyFromView(pair);
+        WebsiteIdPair websiteIdPair = new WebsiteIdPair(deleteDialogWebsiteField.getText(), deleteDialogIdField.getText());
+        keyManagerListener.deleteKey(websiteIdPair, keyType);
+        deleteKeyFromView(websiteIdPair);
         deleteKeyDialog.setVisible(false);
     }
 
@@ -295,31 +302,31 @@ public class KeyManager implements KeyViewListener {
         addOrEditDialogValueField.setText("");
         addMode = true;
         addOrEditKeyDialog.setTitle("Add Key");
-        addOrEditKeyDialog.setVisible(true);
+        JDialogDisplayer.display(addOrEditKeyDialog);
     }
 
     private void displayEditKeyDialog() {
-        Pair pair = currentKeyView.getPair();
-        addOrEditDialogWebsiteField.setText(pair.websiteName());
+        WebsiteIdPair websiteIdPair = currentKeyView.getPair();
+        addOrEditDialogWebsiteField.setText(websiteIdPair.websiteName());
         addOrEditDialogWebsiteField.setEditable(false);
-        addOrEditDialogIdField.setText(pair.id());
+        addOrEditDialogIdField.setText(websiteIdPair.id());
         addOrEditDialogIdField.setEditable(false);
-        addOrEditDialogValueField.setText(keyManagerListener.getKey(pair, keyType));
+        addOrEditDialogValueField.setText(keyManagerListener.getKey(websiteIdPair, keyType));
         addMode = false;
         addOrEditKeyDialog.setTitle("Edit Key");
-        addOrEditKeyDialog.setVisible(true);
+        JDialogDisplayer.display(addOrEditKeyDialog);
     }
 
     private void displayDeleteKeyDialog() {
-        Pair pair = currentKeyView.getPair();
-        deleteDialogWebsiteField.setText(pair.websiteName());
-        deleteDialogIdField.setText(pair.id());
-        deleteKeyDialog.setVisible(true);
+        WebsiteIdPair websiteIdPair = currentKeyView.getPair();
+        deleteDialogWebsiteField.setText(websiteIdPair.websiteName());
+        deleteDialogIdField.setText(websiteIdPair.id());
+        JDialogDisplayer.display(deleteKeyDialog);
     }
 
     @Override
-    public String getValue(Pair pair) {
-        return keyManagerListener.getKey(pair, keyType);
+    public String getValue(WebsiteIdPair websiteIdPair) {
+        return keyManagerListener.getKey(websiteIdPair, keyType);
     }
 
     @Override
