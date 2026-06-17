@@ -11,6 +11,8 @@ import java.util.List;
 public interface SecureVaultGUIListener extends DirectoryViewManagerListener, KeyManagerListener {
     boolean doLogin(Path path, String password, boolean create);
 
+    void shutdown();
+
     List<Path> getFilesList();
 
     List<Pair> getKeysList(KeyType keyType);

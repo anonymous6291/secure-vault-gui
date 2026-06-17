@@ -18,7 +18,7 @@ public interface DirectoryViewManagerListener {
 
     void renameFileFromVault(Path path, String newName);
 
-    void close();
+    void closeVault();
 
     void lockdown(long duration);
 

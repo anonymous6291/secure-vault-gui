@@ -19,7 +19,6 @@ import java.util.regex.Pattern;
 import static com.securevault.gui.displayable.Constants.*;
 
 public class DirectoryViewManager implements DirectoryViewListener {
-    private static final Path SKIP = Path.of("root");
     private final JFrame windowFrame;
     private final JPopupMenu settingPopupMenu = new JPopupMenu("Setting");
     private final DirectoryViewManagerListener directoryViewManagerListener;
@@ -475,7 +474,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
     }
 
     private void closeVault() {
-        directoryViewManagerListener.close();
+        directoryViewManagerListener.closeVault();
         closeVaultDialog.setVisible(false);
     }
 

@@ -314,6 +314,7 @@ public class SecureVaultGUI implements WindowListener {
         if (directoryViewManager != null) {
             directoryViewManager.shutdown();
         }
+        secureVaultGUIListener.shutdown();
     }
 
     @Override
