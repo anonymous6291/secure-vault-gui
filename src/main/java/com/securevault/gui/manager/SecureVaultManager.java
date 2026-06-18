@@ -283,6 +283,20 @@ public class SecureVaultManager implements SecureVaultGUIListener {
     }
 
     @Override
+    public String getLogs() {
+        Output output = sendResponseCommand(CommandType.GET_LOG, List.of("1000"));
+        if (isNormalOutput(output)) {
+            return output.args().getFirst();
+        }
+        return "";
+    }
+
+    @Override
+    public void clearLogs() {
+        sendResponselessCommand(CommandType.CLEAR_LOGS, List.of());
+    }
+
+    @Override
     public int getNumberOfPendingFileTransfer() {
         try {
             Output output = sendResponseCommand(CommandType.GET_NUMBER_OF_PENDING_FILE_TRANSFERS, List.of());
@@ -311,6 +325,11 @@ public class SecureVaultManager implements SecureVaultGUIListener {
     @Override
     public void registerFailedFileTransferConsumer(Consumer<String> consumer) {
         failedFileTransferConsumer = consumer;
+    }
+
+    @Override
+    public void abortAllFileTransfers() {
+        sendResponselessCommand(CommandType.ABORT_ALL_FILE_TRANSFERS, List.of());
     }
 
     @Override
@@ -389,6 +408,8 @@ public class SecureVaultManager implements SecureVaultGUIListener {
         Output output = sendResponseCommand(CommandType.SELF_DESTRUCT, List.of(password));
         if (isNormalOutput(output)) {
             secureVaultGUI.showLoginPage();
+        } else if (output != null) {
+            showErrorMessage(output.args().getFirst());
         }
     }
 
@@ -508,7 +529,6 @@ public class SecureVaultManager implements SecureVaultGUIListener {
     enum CommandType {
         TERMINATE,
         OPEN,
-        IS_OPEN,
         CLOSE,
         RESPONSE,
         VERSION,
@@ -529,17 +549,13 @@ public class SecureVaultManager implements SecureVaultGUIListener {
         GET_PASSWORD,
         DELETE_PASSWORD,
         SEARCH_PASSWORD,
-        DELETE_ALL_PASSWORDS,
         GET_ALL_PASSWORDS,
         PUT_API_KEY,
         GET_API_KEY,
         DELETE_API_KEY,
         SEARCH_API_KEY,
-        DELETE_ALL_API_KEYS,
         GET_ALL_API_KEYS,
         GET_NUMBER_OF_PENDING_FILE_TRANSFERS,
-        GET_NUMBER_OF_FAILED_FILE_TRANSFERS,
-        GET_FAILED_FILE_TRANSFERS_LIST,
         GET_FILE_TRANSFER_PROGRESS,
         GET_LOG,
         CLEAR_LOGS
@@ -551,11 +567,3 @@ public class SecureVaultManager implements SecureVaultGUIListener {
     record Output(OutputType type, int commandId, List<String> args) {
     }
 }
-/*
-        SecretKeyFactory secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-        KeySpec keySpec = new PBEKeySpec(password, salt, iterations, keyLength);
-        SecretKey secretKey = secretKeyFactory.generateSecret(keySpec);
-        secretKeySpec = new SecretKeySpec(secretKey.getEncoded(), "AES");
-        encryptCipher = Cipher.getInstance("AES/GCM/NoPadding");
-        decryptCipher = Cipher.getInstance("AES/GCM/NoPadding");
- */

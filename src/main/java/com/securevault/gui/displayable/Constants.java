@@ -41,6 +41,7 @@ public class Constants {
     public static final int ICON_HEIGHT = 85;
     public static final int WIDTH = 900;
     public static final int HEIGHT = 700;
+    public static final String ABORT_FILE_TRANSFERS_MESSAGE = "<html>You want to abort all file transfers?</html>";
     public static final int PROGRESS_WIDTH = 400;
     public static final int PROGRESS_HEIGHT = 200;
     public static final Color FILE_NAME_COLOR = Color.CYAN;

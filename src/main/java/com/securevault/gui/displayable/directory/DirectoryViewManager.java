@@ -33,6 +33,8 @@ public class DirectoryViewManager implements DirectoryViewListener {
     private JTextField targetRenameFile;
     private JTextField renameFileNewName;
     private JDialog closeVaultDialog;
+    private JDialog logDialog;
+    private JTextPane logTextPane;
     private JDialog lockdownVaultDialog;
     private JLabel lockdownVaultDurationLabel;
     private JTextField lockdownVaultDuration;
@@ -74,7 +76,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
         fileProgressViewer = new FileProgressViewer(directoryViewManagerListener, windowFrame);
     }
 
-    private static JLabel getMessageLabel(String message) {
+    private JLabel getMessageLabel(String message) {
         JLabel jLabel = new JLabel(message);
         jLabel.setFont(SETTING_SUBMENU_DIALOG_FONT);
         jLabel.setForeground(SETTING_SUBMENU_DIALOG_FOREGROUND);
@@ -178,6 +180,11 @@ public class DirectoryViewManager implements DirectoryViewListener {
     private void initSettingPopupMenu() {
         JMenuItem closeVault = getSettingMenuItem("Close Vault");
         closeVault.addActionListener(_ -> manageSettingMenu(closeVaultDialog));
+        JMenuItem viewLogs = getSettingMenuItem("View Logs");
+        viewLogs.addActionListener(_ -> {
+            logTextPane.setText(directoryViewManagerListener.getLogs());
+            manageSettingMenu(logDialog);
+        });
         JMenuItem lockdownVault = getSettingMenuItem("Lockdown Vault");
         lockdownVault.addActionListener(_ -> manageSettingMenu(lockdownVaultDialog));
         JMenuItem changePassword = getSettingMenuItem("Change Vault Password");
@@ -187,11 +194,13 @@ public class DirectoryViewManager implements DirectoryViewListener {
         JMenuItem selfDestructStatus = getSettingMenuItem("Self Destruct Status");
         selfDestructStatus.addActionListener(_ -> manageSettingMenu(selfDestructStatusDialog));
         settingPopupMenu.add(closeVault);
+        settingPopupMenu.add(viewLogs);
         settingPopupMenu.add(lockdownVault);
         settingPopupMenu.add(changePassword);
         settingPopupMenu.add(destroyVault);
         settingPopupMenu.add(selfDestructStatus);
         initCloseVaultDialog();
+        initLogDialog();
         initLockdownVaultDialog();
         initChangePasswordDialog();
         initDestroyVaultDialog();
@@ -246,6 +255,34 @@ public class DirectoryViewManager implements DirectoryViewListener {
         closeVaultDialog.setContentPane(jPanel);
         closeVaultDialog.validate();
         closeVaultDialog.repaint();
+    }
+
+    private void initLogDialog() {
+        logDialog = getSettingDefaultDialog("Logs");
+        JPanel logPanel = new JPanel(new BorderLayout());
+        logPanel.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
+        JPanel container = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        container.setOpaque(false);
+        JButton clear = getButton("Clear", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> {
+            directoryViewManagerListener.clearLogs();
+            logDialog.setVisible(false);
+        });
+        container.add(clear);
+        logTextPane = new JTextPane();
+        logTextPane.setEditable(false);
+        logTextPane.setForeground(SETTING_SUBMENU_DIALOG_FOREGROUND);
+        logTextPane.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
+        logTextPane.setFont(SETTING_SUBMENU_DIALOG_FONT);
+        JScrollPane jScrollPane = new JScrollPane(logTextPane);
+        jScrollPane.getViewport().setOpaque(false);
+        jScrollPane.setOpaque(false);
+        jScrollPane.getVerticalScrollBar().setUnitIncrement(20);
+        jScrollPane.getHorizontalScrollBar().setUnitIncrement(20);
+        jScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        jScrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        logPanel.add(jScrollPane, BorderLayout.CENTER);
+        logPanel.add(container, BorderLayout.SOUTH);
+        logDialog.setContentPane(logPanel);
     }
 
     private void initLockdownVaultDialog() {
@@ -613,8 +650,9 @@ public class DirectoryViewManager implements DirectoryViewListener {
         if (flag) {
             return;
         }
-        directoryViewManagerListener.changeVaultPassword(oldPassword, newPassword1);
-        changePasswordDialog.setVisible(false);
+        if (directoryViewManagerListener.changeVaultPassword(oldPassword, newPassword1)) {
+            changePasswordDialog.setVisible(false);
+        }
     }
 
     private void destroyVault() {
@@ -742,21 +780,23 @@ public class DirectoryViewManager implements DirectoryViewListener {
         }
     }
 
-    static class FileProgressViewer implements Runnable {
-        private static final int REFRESH_DELAY_MS = 300;
+    class FileProgressViewer implements Runnable {
+        private static final int REFRESH_DELAY_MS = 500;
         private final DirectoryViewManagerListener directoryViewManagerListener;
         private final ConcurrentLinkedQueue<String> failedTransferFileMessages = new ConcurrentLinkedQueue<>();
         private final JFrame jFrame;
         private final JDialog fileStatusDialog;
         private final JPanel jPanel;
+        private final JPopupMenu abortFileTransfer;
         private JDialog failedFileDialog;
         private JPanel failedFilesPanel;
         private JLabel failedFilesListLabel;
+        private JPanel failedFilePanel;
+        private JLabel failedFileLabel;
         private JPanel progressPanel;
         private JLabel progressLabel;
         private JProgressBar jProgressBar;
-        private JPanel failedFilePanel;
-        private JLabel failedFileLabel;
+        private JDialog abortDialog;
         private volatile boolean stop;
 
         public FileProgressViewer(DirectoryViewManagerListener directoryViewManagerListener, JFrame jFrame) {
@@ -778,25 +818,65 @@ public class DirectoryViewManager implements DirectoryViewListener {
             jPanel.setOpaque(true);
             fileStatusDialog.setContentPane(jPanel);
             fileStatusDialog.setVisible(false);
+            initAbortDialog();
             initProgressUI();
             initFailedFileUI();
+            abortFileTransfer = new JPopupMenu();
+            JMenuItem abort = new JMenuItem("Abort");
+            abort.setFocusPainted(false);
+            abort.setBackground(SETTING_POPUP_MENU_BACKGROUND);
+            abort.setForeground(SETTING_POPUP_MENU_FOREGROUND);
+            abort.setFont(SETTING_POPUP_MENU_FONT);
+            abort.addActionListener(_ -> JDialogDisplayer.makeVisible(abortDialog));
+            abortFileTransfer.add(abort);
             Thread.startVirtualThread(this);
+        }
+
+        void initAbortDialog() {
+            abortDialog = new JDialog(jFrame, "Abort all file transfers");
+            abortDialog.setSize(new Dimension(SETTING_SUBMENU_DIALOG_WIDTH, SETTING_SUBMENU_DIALOG_HEIGHT));
+            abortDialog.setResizable(false);
+            abortDialog.setLocationRelativeTo(jFrame);
+            abortDialog.setDefaultCloseOperation(JDialog.HIDE_ON_CLOSE);
+            JPanel abortPanel = new JPanel(new GridLayout(0, 1));
+            abortPanel.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
+            JLabel jLabel = getMessageLabel(ABORT_FILE_TRANSFERS_MESSAGE);
+            abortPanel.add(jLabel);
+            JPanel container = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 50));
+            container.setOpaque(false);
+            JButton no = getButton("No, don't", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> abortDialog.setVisible(false));
+            JButton yes = getButton("Yes, abort", CONFIRM_BUTTON_BACKGROUND, CONFIRM_BUTTON_FOREGROUND, CONFIRM_BUTTON_FONT, _ -> {
+                abortDialog.setVisible(false);
+                directoryViewManagerListener.abortAllFileTransfers();
+            });
+            container.add(no);
+            container.add(yes);
+            abortPanel.add(container);
+            abortDialog.setContentPane(abortPanel);
         }
 
         void initProgressUI() {
             progressPanel = new JPanel(new GridLayout(0, 1));
             progressPanel.setBackground(Color.GREEN);
-            progressLabel = getMessageLabel("Transferring 5000 files....");
+            progressLabel = getMessageLabel("");
             JPanel container = new JPanel(new FlowLayout(FlowLayout.CENTER));
             container.setOpaque(false);
             jProgressBar = new JProgressBar(JProgressBar.HORIZONTAL, 0, 100);
             jProgressBar.setIndeterminate(false);
             jProgressBar.setValue(50);
             jProgressBar.setStringPainted(true);
-            jProgressBar.setString("50%");
+            jProgressBar.setString("");
             container.add(jProgressBar);
             progressPanel.add(progressLabel);
             progressPanel.add(container);
+            progressPanel.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    if (e.getButton() == MouseEvent.BUTTON3) {
+                        abortFileTransfer.show(progressPanel, e.getX(), e.getY());
+                    }
+                }
+            });
         }
 
         void initFailedFileUI() {

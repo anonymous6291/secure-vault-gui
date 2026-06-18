@@ -6,11 +6,17 @@ import java.util.function.Consumer;
 public interface DirectoryViewManagerListener {
     boolean changeVaultPassword(String oldPassword, String newPassword);
 
+    String getLogs();
+
+    void clearLogs();
+
     int getNumberOfPendingFileTransfer();
 
     double getFileTransferProgress();
 
     void registerFailedFileTransferConsumer(Consumer<String> consumer);
+
+    void abortAllFileTransfers();
 
     void addFileToVault(Path from, Path to);
 
