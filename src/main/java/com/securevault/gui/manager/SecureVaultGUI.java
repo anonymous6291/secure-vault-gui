@@ -24,8 +24,8 @@ public class SecureVaultGUI implements WindowListener {
     private final SecureVaultGUIListener secureVaultGUIListener;
     private final JFrame jFrame;
     private final Dimension dimension;
-    private volatile CompletableFuture<String> optionQuery = null;
     private final Semaphore dialogLock = new Semaphore(1, true);
+    private volatile CompletableFuture<String> optionQuery = null;
     private JPanel loginPanel;
     private JPanel vaultViewPanel;
     private JDialog optionDialog;
@@ -55,7 +55,6 @@ public class SecureVaultGUI implements WindowListener {
         initOptionDialog();
         initErrorDialog();
         initLoginPage();
-        //initVaultViews();
         jFrame.setContentPane(loginPanel);
         jFrame.setVisible(true);
     }
@@ -122,7 +121,7 @@ public class SecureVaultGUI implements WindowListener {
         passwordField.setForeground(Constants.TEXT_FIELD_FOREGROUND);
         passwordField.setFont(Constants.TEXT_FIELD_FONT);
         passwordField.setPreferredSize(new Dimension(50, 30));
-        passwordField.setEchoChar('*');
+        passwordField.setEchoChar(Constants.PASSWORD_ECHO_CHAR);
         JCheckBox showPassword = new JCheckBox("Show");
         showPassword.setForeground(Color.CYAN);
         showPassword.setFocusPainted(false);
@@ -132,7 +131,7 @@ public class SecureVaultGUI implements WindowListener {
             if (showPassword.isSelected()) {
                 passwordField.setEchoChar('\0');
             } else {
-                passwordField.setEchoChar('*');
+                passwordField.setEchoChar(Constants.PASSWORD_ECHO_CHAR);
             }
         });
         container.add(passwordField);
@@ -176,7 +175,7 @@ public class SecureVaultGUI implements WindowListener {
             } catch (Exception _) {
             }
         };
-        JButton proceed = getButton("Create", Constants.CANCEL_BUTTON_BACKGROUND, Constants.CANCEL_BUTTON_FOREGROUND, Constants.CANCEL_BUTTON_FONT, proceedButtonListener);
+        JButton proceed = getButton(create.isSelected() ? "Create" : "Open", Constants.CANCEL_BUTTON_BACKGROUND, Constants.CANCEL_BUTTON_FOREGROUND, Constants.CANCEL_BUTTON_FONT, proceedButtonListener);
         create.addActionListener(_ -> {
             if (create.isSelected()) {
                 proceed.setText("Create");
@@ -189,9 +188,9 @@ public class SecureVaultGUI implements WindowListener {
         loginPanel.add(container);
     }
 
-    private JDialog getJDialog(String name, int w, int h, int closeOperation) {
+    private JDialog getJDialog(String name, int width, int height, int closeOperation) {
         JDialog jDialog = new JDialog(jFrame, name, true);
-        jDialog.setSize(new Dimension(w, h));
+        jDialog.setSize(new Dimension(width, height));
         jDialog.setLocationRelativeTo(jFrame);
         jDialog.setResizable(false);
         jDialog.setDefaultCloseOperation(closeOperation);
@@ -232,7 +231,7 @@ public class SecureVaultGUI implements WindowListener {
     }
 
     private void initErrorDialog() {
-        errorDialog = getJDialog("Error", Constants.SETTING_SUBMENU_DIALOG_WIDTH, Constants.SETTING_SUBMENU_DIALOG_HEIGHT, JDialog.HIDE_ON_CLOSE);
+        errorDialog = getJDialog("Error", Constants.SETTING_SUBMENU_DIALOG_WIDTH, Constants.SETTING_SUBMENU_DIALOG_HEIGHT, JDialog.DO_NOTHING_ON_CLOSE);
         JPanel jPanel = new JPanel(new GridLayout(0, 1));
         jPanel.setBackground(Constants.SETTING_SUBMENU_DIALOG_BACKGROUND);
         errorDialogLabel = getLabel("", Constants.SETTING_SUBMENU_DIALOG_FOREGROUND);
@@ -256,7 +255,6 @@ public class SecureVaultGUI implements WindowListener {
         tabbedPane.add("Files", directoryViewManager.getDisplayPanel());
         tabbedPane.add("Passwords", passwordManager.getDisplayPanel());
         tabbedPane.add("APIKeys", apiKeyManager.getDisplayPanel());
-        //tabbedPane.setSelectedIndex(1);
         vaultViewPanel = new JPanel();
         vaultViewPanel.setLayout(new BorderLayout());
         vaultViewPanel.add(tabbedPane, BorderLayout.CENTER);
@@ -282,7 +280,7 @@ public class SecureVaultGUI implements WindowListener {
             options.forEach(optionDialogOptions::addItem);
             optionDialog.validate();
             optionDialog.repaint();
-            JDialogDisplayer.display(optionDialog);
+            JDialogDisplayer.makeVisible(optionDialog);
             return optionQuery.get();
         } catch (Exception e) {
             return "";
@@ -297,8 +295,7 @@ public class SecureVaultGUI implements WindowListener {
         errorDialogLabel.setText("<html>" + message + "</html>");
         errorDialog.validate();
         errorDialog.repaint();
-        JDialogDisplayer.display(errorDialog);
-        IO.println("Exit");
+        JDialogDisplayer.makeVisible(errorDialog);
     }
 
     public void addFile(Path filePath) {

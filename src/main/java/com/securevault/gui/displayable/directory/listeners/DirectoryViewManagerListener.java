@@ -4,6 +4,8 @@ import java.nio.file.Path;
 import java.util.function.Consumer;
 
 public interface DirectoryViewManagerListener {
+    boolean changeVaultPassword(String oldPassword, String newPassword);
+
     int getNumberOfPendingFileTransfer();
 
     double getFileTransferProgress();

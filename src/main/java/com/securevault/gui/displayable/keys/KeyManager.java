@@ -302,7 +302,7 @@ public class KeyManager implements KeyViewListener {
         addOrEditDialogValueField.setText("");
         addMode = true;
         addOrEditKeyDialog.setTitle("Add Key");
-        JDialogDisplayer.display(addOrEditKeyDialog);
+        JDialogDisplayer.makeVisible(addOrEditKeyDialog);
     }
 
     private void displayEditKeyDialog() {
@@ -314,14 +314,14 @@ public class KeyManager implements KeyViewListener {
         addOrEditDialogValueField.setText(keyManagerListener.getKey(websiteIdPair, keyType));
         addMode = false;
         addOrEditKeyDialog.setTitle("Edit Key");
-        JDialogDisplayer.display(addOrEditKeyDialog);
+        JDialogDisplayer.makeVisible(addOrEditKeyDialog);
     }
 
     private void displayDeleteKeyDialog() {
         WebsiteIdPair websiteIdPair = currentKeyView.getPair();
         deleteDialogWebsiteField.setText(websiteIdPair.websiteName());
         deleteDialogIdField.setText(websiteIdPair.id());
-        JDialogDisplayer.display(deleteKeyDialog);
+        JDialogDisplayer.makeVisible(deleteKeyDialog);
     }
 
     @Override

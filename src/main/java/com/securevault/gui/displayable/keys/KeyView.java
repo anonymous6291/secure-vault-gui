@@ -11,7 +11,7 @@ import java.awt.event.MouseEvent;
 import static com.securevault.gui.displayable.Constants.*;
 
 public class KeyView extends MouseAdapter {
-    private static final String HIDDEN_PASSWORD_TEXT = "**********";
+    private static final String HIDDEN_PASSWORD_TEXT = ("" + PASSWORD_ECHO_CHAR).repeat(6);
     private final WebsiteIdPair websiteIdPair;
     private final KeyViewListener keyViewListener;
     private final JPanel view;

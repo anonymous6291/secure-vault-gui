@@ -5,6 +5,7 @@ import javax.swing.border.SoftBevelBorder;
 import java.awt.*;
 
 public class Constants {
+    public static final char PASSWORD_ECHO_CHAR = '•';
     public static final String LOGIN_PAGE_BACKGROUND_IMAGE = "background_images/background.jpg";
     public static final String VAULT_PATH_LABEL_MESSAGE = "<html>Enter the vault path:</html>";
     public static final String VAULT_PATH_LABEL_ERROR_MESSAGE = "<html>Enter the vault path: (Invalid path)</html>";
@@ -44,6 +45,9 @@ public class Constants {
     public static final int PROGRESS_HEIGHT = 200;
     public static final Color FILE_NAME_COLOR = Color.CYAN;
     public static final Font FILE_NAME_FONT = new Font(Font.DIALOG_INPUT, Font.BOLD, 11);
+    public static final Color FILE_NAME_POPUP_BACKGROUND = Color.CYAN;
+    public static final Color FILE_NAME_POPUP_FOREGROUND = Color.BLACK;
+    public static final Font FILE_NAME_POPUP_FONT = new Font(Font.DIALOG, Font.BOLD, 10);
     public static final Color PATH_LABEL_COLOR = Color.MAGENTA;
     public static final Font PATH_LABEL_FONT = new Font(Font.DIALOG_INPUT, Font.BOLD, 13);
     public static final Color TEXT_FIELD_BACKGROUND = Color.YELLOW;
@@ -65,6 +69,13 @@ public class Constants {
     public static final String DESTROY_VAULT_MENU_MESSAGE = "<html> Destroying the vault will cause you to lose all the contents. If you really want to destroy the vault then enter the password and proceed. (This action is not revertible!)</html>";
     public static final String LOCKDOWN_VAULT_DURATION_FIELD_LABEL_MESSAGE = "<html> Duration :</html>";
     public static final String LOCKDOWN_VAULT_DURATION_FIELD_LABEL_INVALID_MESSAGE = "<html> Duration (Invalid!): </html>";
+    public static final String CHANGE_PASSWORD_MENU_MESSAGE = "<html>You are about to change the vault password!</html>";
+    public static final String CHANGE_PASSWORD_MENU_OLD_PASSWORD_MESSAGE = "<html>Enter the old password:</html>";
+    public static final String CHANGE_PASSWORD_MENU_OLD_PASSWORD_INVALID_MESSAGE = "<html>Enter the old password: (Must be at least 5 characters long)</html>";
+    public static final String CHANGE_PASSWORD_MENU_NEW_PASSWORD_MESSAGE = "<html>Enter the new password:</html>";
+    public static final String CHANGE_PASSWORD_MENU_NEW_PASSWORD_INVALID_MESSAGE = "<html>Enter the new password: (Must be at least 5 characters long)</html>";
+    public static final String CHANGE_PASSWORD_MENU_REENTER_NEW_PASSWORD_MESSAGE = "<html>Renter the new password:</html>";
+    public static final String CHANGE_PASSWORD_MENU_REENTER_NEW_PASSWORD_INVALID_MESSAGE = "<html>Renter the new password: (Passwords doesn't match)</html>";
     public static final String DESTROY_VAULT_PASSWORD_FIELD_LABEL_MESSAGE = "<html> Password :</html>";
     public static final String DESTROY_VAULT_PASSWORD_FIELD_LABEL_ERROR_MESSAGE = "<html> Password (Failed!): </html>";
     public static final String SELF_DESTRUCT_MENU_MESSAGE = "<html>When enabled, after given number of wrong password tries the vault will be destroyed.</html>";

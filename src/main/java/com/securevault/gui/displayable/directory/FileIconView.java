@@ -15,6 +15,8 @@ public class FileIconView extends MouseAdapter {
     private static final int FILE_NAME_HEIGHT = 15;
     private static final int FILE_ICON_WIDTH = Constants.ICON_WIDTH;
     private static final int FILE_ICON_HEIGHT = Constants.ICON_HEIGHT - FILE_NAME_HEIGHT;
+    private final JPopupMenu fileNamePopup;
+    private final JMenuItem fileNameMenuItem;
     private final JPanel jPanel;
     private final JPanel iconPanel;
     private final JLabel fileNameLabel;
@@ -50,7 +52,15 @@ public class FileIconView extends MouseAdapter {
         jPanel.add(iconPanel, BorderLayout.CENTER);
         jPanel.add(fileNameLabel, BorderLayout.SOUTH);
         jPanel.addMouseListener(this);
+        jPanel.addMouseMotionListener(this);
         removeBorder();
+        fileNamePopup = new JPopupMenu();
+        fileNameMenuItem = new JMenuItem(fileName);
+        fileNameMenuItem.setFocusPainted(false);
+        fileNameMenuItem.setBackground(Constants.FILE_NAME_POPUP_BACKGROUND);
+        fileNameMenuItem.setForeground(Constants.FILE_NAME_POPUP_FOREGROUND);
+        fileNameMenuItem.setFont(Constants.FILE_NAME_POPUP_FONT);
+        fileNamePopup.add(fileNameMenuItem);
     }
 
     public JPanel getDisplayableComponent() {
@@ -64,6 +74,7 @@ public class FileIconView extends MouseAdapter {
     public void setFileName(String fileName) {
         this.fileName = fileName;
         fileNameLabel.setText(fileName);
+        fileNameMenuItem.setText(fileName);
     }
 
     public boolean isDirectory() {
@@ -82,6 +93,16 @@ public class FileIconView extends MouseAdapter {
 
     public boolean isBorderSet() {
         return borderSet;
+    }
+
+    @Override
+    public void mouseMoved(MouseEvent mouseEvent) {
+        fileNamePopup.show(iconPanel, mouseEvent.getX() + 5, mouseEvent.getY() + 5);
+    }
+
+    @Override
+    public void mouseExited(MouseEvent mouseEvent) {
+        fileNamePopup.setVisible(false);
     }
 
     @Override

@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class Main {
+    private static final int pendingFilesCount = 0;
+    private static final double progress = 0;
     private static SecureVaultGUI secureVaultGUI;
     private static Consumer<String> failedFilesListConsumer;
-    private static int pendingFilesCount = 0;
-    private static double progress = 0;
 
     static void main() {
         try {

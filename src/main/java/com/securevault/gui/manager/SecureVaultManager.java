@@ -98,7 +98,7 @@ public class SecureVaultManager implements SecureVaultGUIListener {
                         for (char c : output) {
                             result[i++] = c;
                         }
-                        processRawOutput(new String(result));
+                        Thread.startVirtualThread(() -> processRawOutput(new String(result)));
                         output.clear();
                     } else if (v != -1) {
                         output.add((char) v);
@@ -190,11 +190,10 @@ public class SecureVaultManager implements SecureVaultGUIListener {
     private void handleOutput(Output output) {
         List<String> args = output.args();
         switch (output.type()) {
-            case ERROR -> {
-                secureVaultGUI.showErrorDialog(args.getFirst());
+            case ERROR, RESPONSE -> {
                 CompletableFuture<Output> completableFuture = commandMapping.remove(output.commandId());
                 if (completableFuture != null) {
-                    completableFuture.complete(null);
+                    completableFuture.complete(output);
                 }
             }
             case INVALID_COMMAND -> {
@@ -203,19 +202,14 @@ public class SecureVaultManager implements SecureVaultGUIListener {
                     completableFuture.complete(null);
                 }
             }
-            case RESPONSE -> {
-                CompletableFuture<Output> completableFuture = commandMapping.remove(output.commandId());
-                if (completableFuture != null) {
-                    completableFuture.complete(output);
-                }
-            }
             case QUERY -> {
                 String id = args.getFirst();
                 String message = args.get(1);
                 List<String> options = args.subList(2, args.size());
                 String response = secureVaultGUI.askForQuery(message, options);
                 try {
-                    sendCommand(new Command(CommandType.RESPONSE, -1, List.of(id, response)));
+                    Command command = new Command(CommandType.RESPONSE, -1, List.of(id, response));
+                    sendCommand(command);
                 } catch (Exception e) {
                     IO.println(e);
                 }
@@ -243,11 +237,20 @@ public class SecureVaultManager implements SecureVaultGUIListener {
         return commandID.getAndIncrement();
     }
 
-    private Output sendCommandAndGetResponse(Command command) {
+    private void sendResponselessCommand(CommandType commandType, List<String> args) {
         try {
-            sendCommand(command);
+            sendCommand(new Command(commandType, -1, args));
+        } catch (Exception e) {
+            IO.println(e);
+        }
+    }
+
+    private Output sendResponseCommand(CommandType commandType, List<String> args) {
+        try {
+            Command command = new Command(commandType, getNewCommandID(), args);
             CompletableFuture<Output> completableFuture = new CompletableFuture<>();
             commandMapping.put(command.commandId(), completableFuture);
+            sendCommand(command);
             return completableFuture.get();
         } catch (Exception e) {
             IO.println(e);
@@ -255,32 +258,52 @@ public class SecureVaultManager implements SecureVaultGUIListener {
         return null;
     }
 
-    private Command getNewCommand(CommandType commandType, List<String> args) {
-        return new Command(commandType, getNewCommandID(), args);
+    private void showErrorMessage(String message) {
+        secureVaultGUI.showErrorDialog(message);
+    }
+
+    private boolean isNormalOutput(Output output) {
+        return !(output == null || output.type() == OutputType.ERROR);
+    }
+
+    @Override
+    public boolean changeVaultPassword(String oldPassword, String newPassword) {
+        try {
+            Output output = sendResponseCommand(CommandType.CHANGE_PASSWORD, List.of(oldPassword, newPassword));
+            if (isNormalOutput(output)) {
+                return Boolean.parseBoolean(output.args().getFirst());
+            }
+            if (output != null) {
+                showErrorMessage(output.args().getFirst());
+            }
+        } catch (Exception e) {
+            IO.println(e);
+        }
+        return false;
     }
 
     @Override
     public int getNumberOfPendingFileTransfer() {
-        Command command = getNewCommand(CommandType.GET_NUMBER_OF_PENDING_FILE_TRANSFERS, List.of());
-        Output output = sendCommandAndGetResponse(command);
         try {
-            if (output != null) {
+            Output output = sendResponseCommand(CommandType.GET_NUMBER_OF_PENDING_FILE_TRANSFERS, List.of());
+            if (isNormalOutput(output)) {
                 return Integer.parseInt(output.args().getFirst());
             }
-        } catch (Exception _) {
+        } catch (Exception e) {
+            IO.println(e);
         }
         return 0;
     }
 
     @Override
     public double getFileTransferProgress() {
-        Command command = getNewCommand(CommandType.GET_FILE_TRANSFER_PROGRESS, List.of());
-        Output output = sendCommandAndGetResponse(command);
         try {
-            if (output != null) {
+            Output output = sendResponseCommand(CommandType.GET_FILE_TRANSFER_PROGRESS, List.of());
+            if (isNormalOutput(output)) {
                 return Double.parseDouble(output.args().getFirst());
             }
-        } catch (Exception _) {
+        } catch (Exception e) {
+            IO.println(e);
         }
         return 0;
     }
@@ -292,29 +315,17 @@ public class SecureVaultManager implements SecureVaultGUIListener {
 
     @Override
     public void addFileToVault(Path from, Path to) {
-        try {
-            Command command = new Command(CommandType.PUT_FILE, -1, List.of(from.toString(), to.toString()));
-            sendCommand(command);
-        } catch (Exception _) {
-        }
+        sendResponselessCommand(CommandType.PUT_FILE, List.of(from.toString(), to.toString()));
     }
 
     @Override
     public void retrieveFileFromVault(Path from, Path to) {
-        try {
-            Command command = new Command(CommandType.GET_FILE, -1, List.of(from.toString(), to.toString()));
-            sendCommand(command);
-        } catch (Exception _) {
-        }
+        sendResponselessCommand(CommandType.GET_FILE, List.of(from.toString(), to.toString()));
     }
 
     @Override
     public void deleteFileFromVault(Path path) {
-        try {
-            Command command = new Command(CommandType.DELETE_FILE, -1, List.of(path.toString()));
-            sendCommand(command);
-        } catch (Exception _) {
-        }
+        sendResponselessCommand(CommandType.DELETE_FILE, List.of(path.toString()));
     }
 
     @Override
@@ -323,150 +334,166 @@ public class SecureVaultManager implements SecureVaultGUIListener {
 
     @Override
     public void closeVault() {
-        try {
-            sendCommand(new Command(CommandType.CLOSE, -1, List.of()));
+        Output output = sendResponseCommand(CommandType.CLOSE, List.of());
+        if (isNormalOutput(output)) {
             secureVaultGUI.showLoginPage();
-        } catch (Exception _) {
         }
     }
 
     @Override
     public void lockdown(long duration) {
-        try {
-            sendCommand(new Command(CommandType.LOCKDOWN, -1, List.of(Long.toString(duration))));
-        } catch (Exception _) {
+        Output output = sendResponseCommand(CommandType.LOCKDOWN, List.of(Long.toString(duration)));
+        if (isNormalOutput(output)) {
+            secureVaultGUI.showLoginPage();
         }
     }
 
     @Override
     public boolean isSelfDestructEnabled() {
-        Command command = getNewCommand(CommandType.IS_SELF_DESTRUCT_ENABLED, List.of());
-        Output output = sendCommandAndGetResponse(command);
         try {
-            if (output != null) {
+            Output output = sendResponseCommand(CommandType.IS_SELF_DESTRUCT_ENABLED, List.of());
+            if (isNormalOutput(output)) {
                 return Boolean.parseBoolean(output.args().getFirst());
             }
-        } catch (Exception _) {
+        } catch (Exception e) {
+            IO.println(e);
         }
         return false;
     }
 
     @Override
     public int getSelfDestructTries() {
-        Command command = getNewCommand(CommandType.GET_SELF_DESTRUCT_TRIES, List.of());
-        Output output = sendCommandAndGetResponse(command);
         try {
-            if (output != null) {
+            Output output = sendResponseCommand(CommandType.GET_SELF_DESTRUCT_TRIES, List.of());
+            if (isNormalOutput(output)) {
                 return Integer.parseInt(output.args().getFirst());
             }
-        } catch (Exception _) {
+        } catch (Exception e) {
+            IO.println(e);
         }
         return 0;
     }
 
     @Override
     public void setSelfDestruct(int tries) {
-        try {
-            Command command = new Command(CommandType.SET_SELF_DESTRUCT, -1, List.of(Integer.toString(tries)));
-            sendCommand(command);
-        } catch (Exception e) {
-        }
+        sendResponselessCommand(CommandType.SET_SELF_DESTRUCT, List.of(Integer.toString(tries)));
     }
 
     @Override
     public void disableSelfDestruct() {
-        try {
-            Command command = new Command(CommandType.DISABLE_SELF_DESTRUCT, -1, List.of());
-            sendCommand(command);
-        } catch (Exception e) {
-        }
+        sendResponselessCommand(CommandType.DISABLE_SELF_DESTRUCT, List.of());
     }
 
     @Override
     public void selfDestructVault(String password) {
+        Output output = sendResponseCommand(CommandType.SELF_DESTRUCT, List.of(password));
+        if (isNormalOutput(output)) {
+            secureVaultGUI.showLoginPage();
+        }
     }
 
     @Override
     public void addKey(WebsiteIdPair websiteIdPair, String value, KeyType keyType) {
+        try {
+            CommandType commandType;
+            if (keyType == KeyType.PASSWORD) {
+                commandType = CommandType.PUT_PASSWORD;
+            } else {
+                commandType = CommandType.PUT_API_KEY;
+            }
+            sendResponselessCommand(commandType, List.of(jsonHandler.writeValueAsString(websiteIdPair), value));
+        } catch (Exception e) {
+            IO.println(e);
+        }
     }
 
     @Override
     public String getKey(WebsiteIdPair websiteIdPair, KeyType keyType) {
+        try {
+            CommandType commandType = keyType == KeyType.PASSWORD ? CommandType.GET_PASSWORD : CommandType.GET_API_KEY;
+            Output output = sendResponseCommand(commandType, List.of(jsonHandler.writeValueAsString(websiteIdPair)));
+            if (isNormalOutput(output)) {
+                return output.args().getFirst();
+            }
+        } catch (Exception e) {
+            IO.println(e);
+        }
         return null;
     }
 
     @Override
     public void deleteKey(WebsiteIdPair websiteIdPair, KeyType keyType) {
+        CommandType commandType;
+        if (keyType == KeyType.PASSWORD) {
+            commandType = CommandType.DELETE_PASSWORD;
+        } else {
+            commandType = CommandType.DELETE_API_KEY;
+        }
+        try {
+            sendResponselessCommand(commandType, List.of(jsonHandler.writeValueAsString(websiteIdPair)));
+        } catch (Exception e) {
+            IO.println(e);
+        }
     }
 
     @Override
     public boolean doLogin(Path path, String password, boolean create) {
-        Command command = getNewCommand(CommandType.OPEN, List.of(path.toString(), Boolean.toString(create), password));
-        Output output = sendCommandAndGetResponse(command);
         try {
-            if (output != null) {
+            Output output = sendResponseCommand(CommandType.OPEN, List.of(path.toString(), Boolean.toString(create), password));
+            if (isNormalOutput(output)) {
                 return Boolean.parseBoolean(output.args().getFirst());
             }
-        } catch (Exception _) {
+            if (output != null) {
+                showErrorMessage(output.args.getFirst());
+            }
+        } catch (Exception e) {
+            IO.println(e);
         }
         return false;
     }
 
     @Override
     public void shutdown() {
-        try {
-            IO.println("Shutdown");
-            sendCommand(new Command(CommandType.TERMINATE, -1, List.of()));
-        } catch (Exception e) {
-            try {
-                vaultProcess.destroyForcibly();
-            } catch (Exception _) {
-            }
-        }
+        sendResponseCommand(CommandType.TERMINATE, List.of());
     }
 
     @Override
     public List<Path> getFilesList() {
-        Command command = getNewCommand(CommandType.GET_FILES_LIST, List.of(""));
-        Output output = sendCommandAndGetResponse(command);
         try {
-            if (output != null) {
-                return output.args().stream().map(x->SKIP_ROOT_PATH.relativize(Path.of(x))).toList();
+            Output output = sendResponseCommand(CommandType.GET_FILES_LIST, List.of(""));
+            if (isNormalOutput(output)) {
+                return output.args().stream().map(x -> SKIP_ROOT_PATH.relativize(Path.of(x))).toList();
             }
-        } catch (Exception _) {
+        } catch (Exception e) {
+            IO.println(e);
         }
         return List.of();
     }
 
     @Override
     public List<WebsiteIdPair> getKeysList(KeyType keyType) {
-        CommandType commandType;
-        if (keyType == KeyType.PASSWORD) {
-            commandType = CommandType.GET_ALL_PASSWORDS;
-        } else {
-            commandType = CommandType.GET_ALL_API_KEYS;
-        }
-        Command command = getNewCommand(commandType, List.of());
-        Output output = sendCommandAndGetResponse(command);
         try {
-            if (output != null) {
+            CommandType commandType;
+            if (keyType == KeyType.PASSWORD) {
+                commandType = CommandType.GET_ALL_PASSWORDS;
+            } else {
+                commandType = CommandType.GET_ALL_API_KEYS;
+            }
+            Output output = sendResponseCommand(commandType, List.of());
+            if (isNormalOutput(output)) {
                 return output.args().stream().map(x -> {
                     try {
                         return jsonHandler.readValue(x, WebsiteIdPair.class);
-                    } catch (JsonProcessingException _) {
+                    } catch (JsonProcessingException e) {
+                        IO.println(e);
                         return null;
                     }
                 }).toList();
             }
-        } catch (Exception _) {
+        } catch (Exception e) {
+            IO.println(e);
         }
         return List.of();
-    }
-
-    record Command(CommandType type, int commandId, List<String> args) {
-    }
-
-    record Output(OutputType type, int commandId, List<String> args) {
     }
 
     enum OutputType {
@@ -516,6 +543,12 @@ public class SecureVaultManager implements SecureVaultGUIListener {
         GET_FILE_TRANSFER_PROGRESS,
         GET_LOG,
         CLEAR_LOGS
+    }
+
+    record Command(CommandType type, int commandId, List<String> args) {
+    }
+
+    record Output(OutputType type, int commandId, List<String> args) {
     }
 }
 /*

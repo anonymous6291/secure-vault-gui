@@ -37,6 +37,13 @@ public class DirectoryViewManager implements DirectoryViewListener {
     private JLabel lockdownVaultDurationLabel;
     private JTextField lockdownVaultDuration;
     private JComboBox<String> lockdownVaultDurationUnit;
+    private JDialog changePasswordDialog;
+    private JLabel oldPasswordLabel;
+    private JLabel newPasswordLabel;
+    private JLabel reenterNewPasswordLabel;
+    private JPasswordField changePasswordOldPasswordField;
+    private JPasswordField changePasswordNewPasswordField;
+    private JPasswordField changePasswordReenterNewPasswordField;
     private JDialog destroyVaultDialog;
     private JLabel destroyVaultPasswordLabel;
     private JPasswordField destroyVaultPasswordField;
@@ -173,16 +180,20 @@ public class DirectoryViewManager implements DirectoryViewListener {
         closeVault.addActionListener(_ -> manageSettingMenu(closeVaultDialog));
         JMenuItem lockdownVault = getSettingMenuItem("Lockdown Vault");
         lockdownVault.addActionListener(_ -> manageSettingMenu(lockdownVaultDialog));
+        JMenuItem changePassword = getSettingMenuItem("Change Vault Password");
+        changePassword.addActionListener(_ -> manageSettingMenu(changePasswordDialog));
         JMenuItem destroyVault = getSettingMenuItem("Destroy Vault");
         destroyVault.addActionListener(_ -> manageSettingMenu(destroyVaultDialog));
         JMenuItem selfDestructStatus = getSettingMenuItem("Self Destruct Status");
         selfDestructStatus.addActionListener(_ -> manageSettingMenu(selfDestructStatusDialog));
         settingPopupMenu.add(closeVault);
         settingPopupMenu.add(lockdownVault);
+        settingPopupMenu.add(changePassword);
         settingPopupMenu.add(destroyVault);
         settingPopupMenu.add(selfDestructStatus);
         initCloseVaultDialog();
         initLockdownVaultDialog();
+        initChangePasswordDialog();
         initDestroyVaultDialog();
         initSelfDestructStatusDialog();
     }
@@ -285,6 +296,82 @@ public class DirectoryViewManager implements DirectoryViewListener {
         lockdownVaultDialog.repaint();
     }
 
+    private JPasswordField getSettingSubMenuPasswordField() {
+        JPasswordField jPasswordField = new JPasswordField(30);
+        jPasswordField.setBackground(TEXT_FIELD_BACKGROUND);
+        jPasswordField.setForeground(TEXT_FIELD_FOREGROUND);
+        jPasswordField.setFont(TEXT_FIELD_FONT);
+        jPasswordField.setPreferredSize(new Dimension(50, 30));
+        jPasswordField.setEchoChar(PASSWORD_ECHO_CHAR);
+        return jPasswordField;
+    }
+
+    private void initChangePasswordDialog() {
+        changePasswordDialog = getSettingDefaultDialog("Change password");
+        JPanel jPanel = new JPanel(new GridBagLayout());
+        jPanel.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
+        GridBagConstraints gridBagConstraints = new GridBagConstraints();
+        gridBagConstraints.fill = GridBagConstraints.BOTH;
+        gridBagConstraints.gridx = 0;
+        gridBagConstraints.gridy = 0;
+        gridBagConstraints.weightx = 1.0;
+        gridBagConstraints.weighty = 1.0;
+        JLabel changePasswordMessage = getMessageLabel(CHANGE_PASSWORD_MENU_MESSAGE);
+        jPanel.add(changePasswordMessage, gridBagConstraints);
+        gridBagConstraints.gridy++;
+        oldPasswordLabel = getMessageLabel(CHANGE_PASSWORD_MENU_OLD_PASSWORD_MESSAGE);
+        jPanel.add(oldPasswordLabel, gridBagConstraints);
+        gridBagConstraints.gridy++;
+        changePasswordOldPasswordField = getSettingSubMenuPasswordField();
+        JPanel container = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        container.setOpaque(false);
+        container.add(changePasswordOldPasswordField);
+        jPanel.add(container, gridBagConstraints);
+        gridBagConstraints.gridy++;
+        newPasswordLabel = getMessageLabel(CHANGE_PASSWORD_MENU_NEW_PASSWORD_MESSAGE);
+        jPanel.add(newPasswordLabel, gridBagConstraints);
+        gridBagConstraints.gridy++;
+        changePasswordNewPasswordField = getSettingSubMenuPasswordField();
+        container = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        container.setOpaque(false);
+        container.add(changePasswordNewPasswordField);
+        jPanel.add(container, gridBagConstraints);
+        gridBagConstraints.gridy++;
+        reenterNewPasswordLabel = getMessageLabel(CHANGE_PASSWORD_MENU_REENTER_NEW_PASSWORD_MESSAGE);
+        jPanel.add(reenterNewPasswordLabel, gridBagConstraints);
+        gridBagConstraints.gridy++;
+        changePasswordReenterNewPasswordField = getSettingSubMenuPasswordField();
+        container = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        container.setOpaque(false);
+        container.add(changePasswordReenterNewPasswordField);
+        jPanel.add(container, gridBagConstraints);
+        gridBagConstraints.gridy++;
+        container = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        container.setOpaque(false);
+        JCheckBox showPassword = new JCheckBox("Show passwords");
+        showPassword.setSelected(false);
+        showPassword.setOpaque(false);
+        showPassword.setForeground(SETTING_SUBMENU_DIALOG_FOREGROUND);
+        showPassword.setFont(SETTING_SUBMENU_DIALOG_FONT);
+        showPassword.addActionListener(_ -> {
+            char echoChar = showPassword.isSelected() ? '\0' : PASSWORD_ECHO_CHAR;
+            changePasswordOldPasswordField.setEchoChar(echoChar);
+            changePasswordNewPasswordField.setEchoChar(echoChar);
+            changePasswordReenterNewPasswordField.setEchoChar(echoChar);
+        });
+        container.add(showPassword);
+        jPanel.add(container, gridBagConstraints);
+        gridBagConstraints.gridy++;
+        container = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        container.setOpaque(false);
+        JButton cancel = getButton("Cancel", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> changePasswordDialog.setVisible(false));
+        JButton change = getButton("Change", CONFIRM_BUTTON_BACKGROUND, CONFIRM_BUTTON_FOREGROUND, CONFIRM_BUTTON_FONT, _ -> changeVaultPassword());
+        container.add(cancel);
+        container.add(change);
+        jPanel.add(container, gridBagConstraints);
+        changePasswordDialog.setContentPane(jPanel);
+    }
+
     private void initDestroyVaultDialog() {
         destroyVaultDialog = getSettingDefaultDialog("Destroy Vault");
         JPanel jPanel = new JPanel(new GridBagLayout());
@@ -307,7 +394,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
         destroyVaultPasswordField.setBackground(TEXT_FIELD_BACKGROUND);
         destroyVaultPasswordField.setForeground(TEXT_FIELD_FOREGROUND);
         destroyVaultPasswordField.setFont(TEXT_FIELD_FONT);
-        destroyVaultPasswordField.setEchoChar('*');
+        destroyVaultPasswordField.setEchoChar(PASSWORD_ECHO_CHAR);
         destroyVaultPasswordField.setPreferredSize(new Dimension(50, 30));
         passwordFieldPanel.add(destroyVaultPasswordLabel);
         passwordFieldPanel.add(destroyVaultPasswordField);
@@ -471,7 +558,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
     }
 
     private void manageSettingMenu(JDialog jDialog) {
-        JDialogDisplayer.display(jDialog);
+        JDialogDisplayer.makeVisible(jDialog);
     }
 
     private void closeVault() {
@@ -487,12 +574,10 @@ public class DirectoryViewManager implements DirectoryViewListener {
                 throw new RuntimeException();
             }
             lockdownVaultDurationLabel.setText(LOCKDOWN_VAULT_DURATION_FIELD_LABEL_MESSAGE);
-            if (option.startsWith("M")) {
+            if (option.startsWith("H")) {
                 value *= 60;
-            } else if (option.startsWith("H")) {
-                value *= 60 * 60;
-            } else {
-                value *= 24 * 60 * 60;
+            } else if (option.startsWith("D")) {
+                value *= 24 * 60;
             }
             directoryViewManagerListener.lockdown(value);
             lockdownVaultDialog.setVisible(false);
@@ -500,6 +585,36 @@ public class DirectoryViewManager implements DirectoryViewListener {
             lockdownVaultDurationLabel.setText(LOCKDOWN_VAULT_DURATION_FIELD_LABEL_INVALID_MESSAGE);
             lockdownVaultDurationLabel.repaint();
         }
+    }
+
+    private void changeVaultPassword() {
+        String oldPassword = new String(changePasswordOldPasswordField.getPassword());
+        String newPassword1 = new String(changePasswordNewPasswordField.getPassword());
+        String newPassword2 = new String(changePasswordReenterNewPasswordField.getPassword());
+        boolean flag = false;
+        if (oldPassword.length() < 5) {
+            oldPasswordLabel.setText(CHANGE_PASSWORD_MENU_OLD_PASSWORD_INVALID_MESSAGE);
+            flag = true;
+        } else {
+            oldPasswordLabel.setText(CHANGE_PASSWORD_MENU_OLD_PASSWORD_MESSAGE);
+        }
+        if (newPassword1.length() < 5) {
+            newPasswordLabel.setText(CHANGE_PASSWORD_MENU_NEW_PASSWORD_INVALID_MESSAGE);
+            flag = true;
+        } else {
+            newPasswordLabel.setText(CHANGE_PASSWORD_MENU_NEW_PASSWORD_MESSAGE);
+        }
+        if (!newPassword1.equals(newPassword2)) {
+            reenterNewPasswordLabel.setText(CHANGE_PASSWORD_MENU_REENTER_NEW_PASSWORD_INVALID_MESSAGE);
+            flag = true;
+        } else {
+            reenterNewPasswordLabel.setText(CHANGE_PASSWORD_MENU_REENTER_NEW_PASSWORD_MESSAGE);
+        }
+        if (flag) {
+            return;
+        }
+        directoryViewManagerListener.changeVaultPassword(oldPassword, newPassword1);
+        changePasswordDialog.setVisible(false);
     }
 
     private void destroyVault() {
@@ -622,7 +737,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
                 targetRenameFile.setText(filePathString);
                 targetRenameFile.setCaretPosition(filePathString.length());
                 renameFileNewName.setText("");
-                JDialogDisplayer.display(renameFileDialog);
+                JDialogDisplayer.makeVisible(renameFileDialog);
             }
         }
     }
@@ -632,7 +747,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
         private final DirectoryViewManagerListener directoryViewManagerListener;
         private final ConcurrentLinkedQueue<String> failedTransferFileMessages = new ConcurrentLinkedQueue<>();
         private final JFrame jFrame;
-        private final JDialog jDialog;
+        private final JDialog fileStatusDialog;
         private final JPanel jPanel;
         private JDialog failedFileDialog;
         private JPanel failedFilesPanel;
@@ -647,10 +762,10 @@ public class DirectoryViewManager implements DirectoryViewListener {
         public FileProgressViewer(DirectoryViewManagerListener directoryViewManagerListener, JFrame jFrame) {
             this.directoryViewManagerListener = directoryViewManagerListener;
             this.jFrame = jFrame;
-            jDialog = new JDialog(jFrame, "");
-            jDialog.setSize(new Dimension(PROGRESS_WIDTH, PROGRESS_HEIGHT));
-            jDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
-            jDialog.setResizable(false);
+            fileStatusDialog = new JDialog(jFrame, "");
+            fileStatusDialog.setSize(new Dimension(PROGRESS_WIDTH, PROGRESS_HEIGHT));
+            fileStatusDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+            fileStatusDialog.setResizable(false);
             setLocation();
             jFrame.addComponentListener(new ComponentAdapter() {
                 @Override
@@ -661,8 +776,8 @@ public class DirectoryViewManager implements DirectoryViewListener {
             directoryViewManagerListener.registerFailedFileTransferConsumer(failedTransferFileMessages::offer);
             jPanel = new JPanel(new GridLayout(0, 1));
             jPanel.setOpaque(true);
-            jDialog.setContentPane(jPanel);
-            jDialog.setVisible(false);
+            fileStatusDialog.setContentPane(jPanel);
+            fileStatusDialog.setVisible(false);
             initProgressUI();
             initFailedFileUI();
             Thread.startVirtualThread(this);
@@ -721,7 +836,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
                 stringBuilder.append(failedTransferFileMessages.poll()).append("<br>");
             }
             failedFilesListLabel.setText(stringBuilder.append("</html>").toString());
-            JDialogDisplayer.display(failedFileDialog);
+            JDialogDisplayer.makeVisible(failedFileDialog);
         }
 
         public void run() {
@@ -754,20 +869,20 @@ public class DirectoryViewManager implements DirectoryViewListener {
                 }
                 if (progressPanelAdded && failedFilePanelAdded) {
                     if (h != PROGRESS_HEIGHT) {
-                        jDialog.setSize(PROGRESS_WIDTH, h = PROGRESS_HEIGHT);
-                        JDialogDisplayer.display(jDialog);
+                        fileStatusDialog.setSize(PROGRESS_WIDTH, h = PROGRESS_HEIGHT);
+                        JDialogDisplayer.makeVisible(fileStatusDialog);
                         setLocation();
                     }
                 } else if (progressPanelAdded || failedFilePanelAdded) {
                     if (h != (PROGRESS_HEIGHT >> 1)) {
-                        jDialog.setSize(PROGRESS_WIDTH, h = PROGRESS_HEIGHT >> 1);
-                        JDialogDisplayer.display(jDialog);
+                        fileStatusDialog.setSize(PROGRESS_WIDTH, h = PROGRESS_HEIGHT >> 1);
+                        JDialogDisplayer.makeVisible(fileStatusDialog);
                         setLocation();
                     }
                 } else {
                     if (h != 0) {
                         h = 0;
-                        jDialog.setVisible(false);
+                        fileStatusDialog.setVisible(false);
                     }
                 }
                 try {
@@ -779,7 +894,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
 
         private void setLocation() {
             Point point = jFrame.getLocation();
-            jDialog.setLocation(new Point(point.x + 3, point.y + jFrame.getSize().height - jDialog.getSize().height - 5));
+            fileStatusDialog.setLocation(new Point(point.x + 3, point.y + jFrame.getSize().height - fileStatusDialog.getSize().height - 5));
         }
 
         public void stop() {
