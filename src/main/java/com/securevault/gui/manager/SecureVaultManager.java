@@ -38,7 +38,8 @@ public class SecureVaultManager implements SecureVaultGUIListener {
     private static final int IPC_PASSWORD_LENGTH = 50;
     private static final int IV_LENGTH = 12;
     private static final int SALT_LENGTH = 16;
-    private static final String EXECUTABLE_VAULT_PATH = "/home/anonymous/IdeaProjects/SecureVault/SecureVaultInstaller/bin/SecureVaultInstaller";
+    private static final String EXECUTABLE_VAULT_PATH = "./secure-vault-core-1.0-SNAPSHOT";
+    private static final String DEPENDENCY_MODE_ARGUMENT = "-d";
     private static final String OUTPUT_SEPARATOR = ";";
     private static final SecureRandom secureRandom = new SecureRandom();
     private static final Path SKIP_ROOT_PATH = Path.of("root");
@@ -46,11 +47,9 @@ public class SecureVaultManager implements SecureVaultGUIListener {
     private final AtomicInteger commandID = new AtomicInteger(1);
     private final Semaphore cipherLock = new Semaphore(1, true);
     private final Semaphore ioLock = new Semaphore(1, true);
-    private final String DEPENDENCY_MODE_ARGUMENT = "-d";
     private final ObjectMapper jsonHandler = new ObjectMapper();
     private final Base64.Encoder base64Encoder = Base64.getEncoder();
     private final Base64.Decoder base64Decoder = Base64.getDecoder();
-    private final ProcessBuilder vaultProcessBuilder = new ProcessBuilder(EXECUTABLE_VAULT_PATH, DEPENDENCY_MODE_ARGUMENT);
     private final Process vaultProcess;
     private final BufferedInputStream vaultInputStream;
     private final BufferedOutputStream vaultOutputStream;
@@ -64,6 +63,7 @@ public class SecureVaultManager implements SecureVaultGUIListener {
 
     public SecureVaultManager() throws Exception {
         jsonHandler.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        ProcessBuilder vaultProcessBuilder = new ProcessBuilder(EXECUTABLE_VAULT_PATH, DEPENDENCY_MODE_ARGUMENT);
         vaultProcess = vaultProcessBuilder.start();
         vaultInputStream = new BufferedInputStream(vaultProcess.getInputStream());
         vaultOutputStream = new BufferedOutputStream(vaultProcess.getOutputStream());
@@ -149,32 +149,40 @@ public class SecureVaultManager implements SecureVaultGUIListener {
 
     private String decryptData(String data) throws Exception {
         setCipherLock();
-        int index = data.indexOf(OUTPUT_SEPARATOR);
-        byte[] iv = base64Decoder.decode(data.substring(0, index));
-        String encryptedData = data.substring(index + 1);
-        byte[] dataBytes = base64Decoder.decode(encryptedData);
-        initCipher(cipher, Cipher.DECRYPT_MODE, iv);
-        String finalData = new String(cipher.doFinal(dataBytes));
-        unlockCipherLock();
-        return finalData;
+        try {
+            int index = data.indexOf(OUTPUT_SEPARATOR);
+            byte[] iv = base64Decoder.decode(data.substring(0, index));
+            String encryptedData = data.substring(index + 1);
+            byte[] dataBytes = base64Decoder.decode(encryptedData);
+            initCipher(cipher, Cipher.DECRYPT_MODE, iv);
+            return new String(cipher.doFinal(dataBytes));
+        } finally {
+            unlockCipherLock();
+        }
     }
 
     private String encryptData(String data) throws Exception {
         setCipherLock();
-        initCipher(cipher, Cipher.ENCRYPT_MODE, iv);
-        byte[] dataBytes = cipher.doFinal(data.getBytes());
-        String encryptedData = base64Encoder.encodeToString(dataBytes);
-        String finalData = base64Encoder.encodeToString(iv) + OUTPUT_SEPARATOR + encryptedData;
-        incrementIV();
-        unlockCipherLock();
-        return finalData;
+        try {
+            initCipher(cipher, Cipher.ENCRYPT_MODE, iv);
+            byte[] dataBytes = cipher.doFinal(data.getBytes());
+            String encryptedData = base64Encoder.encodeToString(dataBytes);
+            String finalData = base64Encoder.encodeToString(iv) + OUTPUT_SEPARATOR + encryptedData;
+            incrementIV();
+            return finalData;
+        } finally {
+            unlockCipherLock();
+        }
     }
 
     private void writeNewLineToVaultProcess(String data) throws Exception {
         setIOLock();
-        vaultOutputStream.write((data + "\n").getBytes());
-        vaultOutputStream.flush();
-        unlockIOLock();
+        try {
+            vaultOutputStream.write((data + "\n").getBytes());
+            vaultOutputStream.flush();
+        } finally {
+            unlockIOLock();
+        }
     }
 
     private void processRawOutput(String outputData) {
@@ -284,7 +292,7 @@ public class SecureVaultManager implements SecureVaultGUIListener {
 
     @Override
     public String getLogs() {
-        Output output = sendResponseCommand(CommandType.GET_LOG, List.of("1000"));
+        Output output = sendResponseCommand(CommandType.GET_LOG, List.of("10000"));
         if (isNormalOutput(output)) {
             return output.args().getFirst();
         }

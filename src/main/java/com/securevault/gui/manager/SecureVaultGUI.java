@@ -95,7 +95,7 @@ public class SecureVaultGUI implements WindowListener {
         JPanel container = new JPanel(new FlowLayout(FlowLayout.CENTER));
         container.setOpaque(false);
         JTextField vaultPathField = new JTextField(30);
-        vaultPathField.setText("/home/anonymous/Desktop/SecureVaultData/");
+        vaultPathField.setText("");
         vaultPathField.setBackground(Constants.TEXT_FIELD_BACKGROUND);
         vaultPathField.setForeground(Constants.TEXT_FIELD_FOREGROUND);
         vaultPathField.setPreferredSize(new Dimension(50, 30));
@@ -116,7 +116,7 @@ public class SecureVaultGUI implements WindowListener {
         container = new JPanel(new FlowLayout(FlowLayout.CENTER));
         container.setOpaque(false);
         JPasswordField passwordField = new JPasswordField(30);
-        passwordField.setText("hello");
+        passwordField.setText("");
         passwordField.setBackground(Constants.TEXT_FIELD_BACKGROUND);
         passwordField.setForeground(Constants.TEXT_FIELD_FOREGROUND);
         passwordField.setFont(Constants.TEXT_FIELD_FONT);
