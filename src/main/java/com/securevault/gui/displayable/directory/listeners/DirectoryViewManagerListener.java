@@ -24,7 +24,7 @@ public interface DirectoryViewManagerListener {
 
     void deleteFileFromVault(Path path);
 
-    void renameFileFromVault(Path path, String newName);
+    String renameFileFromVault(Path path, String newName);
 
     void closeVault();
 

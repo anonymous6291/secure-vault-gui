@@ -18,6 +18,7 @@ import java.util.concurrent.Semaphore;
 public class DirectoryView implements FileIconViewEventListener {
     private final JPopupMenu filePopupMenu = new JPopupMenu("Action: ");
     private final JPopupMenu directoryViewPopupMenu = new JPopupMenu("Action: ");
+    private final JMenuItem renameMenu;
     private final TreeMap<String, DirectoryView> directories = new TreeMap<>();
     private final TreeSet<String> files = new TreeSet<>();
     private final Map<String, FileIconView> fileIconViewMap = new HashMap<>();
@@ -39,7 +40,8 @@ public class DirectoryView implements FileIconViewEventListener {
         directoryViewPopupMenu.add(getMenuItem("Add Files", DirectoryViewAction.ADD));
         filePopupMenu.add(getMenuItem("Retrieve", DirectoryViewAction.RETRIEVE));
         filePopupMenu.add(getMenuItem("Delete", DirectoryViewAction.DELETE));
-        //filePopupMenu.add(getMenuItem("Rename", DirectoryViewAction.RENAME));
+        renameMenu = getMenuItem("Rename", DirectoryViewAction.RENAME);
+        filePopupMenu.add(renameMenu);
         filePopupMenu.add(getMenuItem("Add Files", DirectoryViewAction.ADD));
         displayComponent.addMouseListener(new MouseAdapter() {
             @Override
@@ -140,6 +142,7 @@ public class DirectoryView implements FileIconViewEventListener {
             }
             fileIconView.setFileName(newFileName);
             fileIconViewMap.put(newFileName, fileIconView);
+            fileIconView.updateIcon();
             if (fileIconView.isDirectory()) {
                 DirectoryView directoryView = directories.remove(targetFile);
                 directoryView.setDirectoryName(newFileName);
@@ -244,6 +247,7 @@ public class DirectoryView implements FileIconViewEventListener {
             lastSelectedFileIconView.removeBorder();
             currentSelectedFileIconView.setBorder();
             if (mouseEvent.getButton() == MouseEvent.BUTTON3) {
+                renameMenu.setVisible(!currentSelectedFileIconView.isDirectory());
                 filePopupMenu.show(currentSelectedFileIconView.getDisplayableComponent(), mouseEvent.getX(), mouseEvent.getY());
             } else if (mouseEvent.getClickCount() > 1) {
                 String fileName = currentSelectedFileIconView.getFileName();

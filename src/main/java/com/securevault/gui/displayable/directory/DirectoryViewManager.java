@@ -32,6 +32,8 @@ public class DirectoryViewManager implements DirectoryViewListener {
     private JLabel renameFileNewNameLabel;
     private JTextField targetRenameFile;
     private JTextField renameFileNewName;
+    private JDialog deleteFileDialog;
+    private JTextField deleteFilePath;
     private JDialog closeVaultDialog;
     private JDialog logDialog;
     private JTextPane logTextPane;
@@ -70,6 +72,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
         fileChooser.setMultiSelectionEnabled(true);
         fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         initRenameFileDialog();
+        initDeleteFileDialog();
         initSettingPopupMenu();
         displayPanel.add(getTopView(displaySize), BorderLayout.NORTH);
         displayPanel.add(currentDirectoryView.getDisplayComponent(), BorderLayout.CENTER);
@@ -134,6 +137,47 @@ public class DirectoryViewManager implements DirectoryViewListener {
         buttons.add(yes);
         jPanel.add(buttons, gbc);
         renameFileDialog.setContentPane(jPanel);
+    }
+
+    private void initDeleteFileDialog() {
+        deleteFileDialog = getSettingDefaultDialog("Delete File");
+        JPanel jPanel = new JPanel(new GridLayout(0, 1));
+        jPanel.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
+        JLabel jLabel = getMessageLabel(DELETE_FILE_LABEL_MESSAGE);
+        jPanel.add(jLabel);
+        JPanel container = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        container.setOpaque(false);
+        deleteFilePath = getTextField(30, 50);
+        deleteFilePath.setEditable(false);
+        container.add(deleteFilePath);
+        jPanel.add(container);
+        container = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 10));
+        container.setOpaque(false);
+        JButton no = getButton("No", CONFIRM_BUTTON_BACKGROUND, CONFIRM_BUTTON_FOREGROUND, CONFIRM_BUTTON_FONT, _ -> deleteFileDialog.setVisible(false));
+        JButton yes = getButton("Yes", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> {
+            deleteFileDialog.setVisible(false);
+            try {
+                Path filePath = Path.of(deleteFilePath.getText());
+                directoryViewManagerListener.deleteFileFromVault(filePath);
+                deleteFile(filePath);
+                DirectoryView directoryView = rootDirectoryView;
+                String[] paths = splitPath(filePath);
+                int n = paths.length - 1;
+                for (int i = 0; i < n; i++) {
+                    directoryView = directoryView.getChildDirectoryView(paths[i]);
+                    if (directoryView == null) {
+                        return;
+                    }
+                }
+                currentDirectoryView.deleteFile(filePath.getFileName().toString());
+            } catch (Exception e) {
+                IO.println(e);
+            }
+        });
+        container.add(no);
+        container.add(yes);
+        jPanel.add(container);
+        deleteFileDialog.setContentPane(jPanel);
     }
 
     private JComponent getTopView(Dimension dimension) {
@@ -715,10 +759,14 @@ public class DirectoryViewManager implements DirectoryViewListener {
             if (directoryView.fileExists(renamedName)) {
                 renameFileNewNameLabel.setText(RENAME_FILE_LABEL_NEW_FILE_ALREADY_EXISTS_MESSAGE);
             } else {
-                directoryViewManagerListener.renameFileFromVault(targetPath, renamedName);
-                currentDirectoryView.renameFile(targetFileName, renamedName);
-                renameFileDialog.setVisible(false);
-                renameFileNewNameLabel.setText(RENAME_FILE_LABEL_NEW_FILE_MESSAGE);
+                String fileName = directoryViewManagerListener.renameFileFromVault(targetPath, renamedName);
+                if (fileName != null) {
+                    currentDirectoryView.renameFile(targetFileName, fileName);
+                    renameFileDialog.setVisible(false);
+                    renameFileNewNameLabel.setText(RENAME_FILE_LABEL_NEW_FILE_MESSAGE);
+                } else {
+                    renameFileNewNameLabel.setText(RENAME_FILE_LABEL_NEW_FILE_ALREADY_EXISTS_MESSAGE);
+                }
             }
         } catch (Exception e) {
             renameFileNewNameLabel.setText(RENAME_FILE_LABEL_NEW_FILE_INVALID_NAME);
@@ -753,22 +801,8 @@ public class DirectoryViewManager implements DirectoryViewListener {
             }
             case RETRIEVE -> directoryViewManagerListener.retrieveFileFromVault(filePath, Path.of(""));
             case DELETE -> {
-                try {
-                    directoryViewManagerListener.deleteFileFromVault(filePath);
-                    deleteFile(filePath);
-                    DirectoryView directoryView = rootDirectoryView;
-                    String[] paths = splitPath(filePath);
-                    int n = paths.length - 1;
-                    for (int i = 0; i < n; i++) {
-                        directoryView = directoryView.getChildDirectoryView(paths[i]);
-                        if (directoryView == null) {
-                            return;
-                        }
-                    }
-                    currentDirectoryView.deleteFile(filePath.getFileName().toString());
-                } catch (Exception e) {
-                    IO.println(e);
-                }
+                deleteFilePath.setText(filePath.toString());
+                JDialogDisplayer.makeVisible(deleteFileDialog);
             }
             case RENAME -> {
                 String filePathString = filePath.toString();
@@ -789,7 +823,6 @@ public class DirectoryViewManager implements DirectoryViewListener {
         private final JPanel jPanel;
         private final JPopupMenu abortFileTransfer;
         private JDialog failedFileDialog;
-        private JPanel failedFilesPanel;
         private JLabel failedFilesListLabel;
         private JPanel failedFilePanel;
         private JLabel failedFileLabel;
@@ -886,7 +919,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
             failedFileDialog.setLocationRelativeTo(jFrame);
             failedFileDialog.setVisible(false);
             failedFilesListLabel = getMessageLabel("");
-            failedFilesPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+            JPanel failedFilesPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
             failedFilesPanel.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
             failedFilesPanel.add(failedFilesListLabel);
             JScrollPane jScrollPane = new JScrollPane(failedFilesPanel);

@@ -356,7 +356,17 @@ public class SecureVaultManager implements SecureVaultGUIListener {
     }
 
     @Override
-    public void renameFileFromVault(Path path, String newName) {
+    public String renameFileFromVault(Path path, String newName) {
+        Output output = sendResponseCommand(CommandType.CHANGE_FILE_NAME, List.of(path.toString(), newName));
+        try {
+            if (isNormalOutput(output)) {
+                if (Boolean.parseBoolean(output.args().getFirst())) {
+                    return output.args().get(1);
+                }
+            }
+        } catch (Exception _) {
+        }
+        return null;
     }
 
     @Override

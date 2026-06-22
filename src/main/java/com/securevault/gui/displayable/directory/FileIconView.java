@@ -29,18 +29,9 @@ public class FileIconView extends MouseAdapter {
         this.fileName = fileName;
         this.directory = directory;
         this.fileIconViewEventListener = fileIconViewEventListener;
-        URL iconURL;
-        if (directory) {
-            iconURL = IconManager.getDirectoryIconURL();
-        } else {
-            iconURL = IconManager.getFileIconURL(fileName);
-        }
         jPanel = new JPanel(new BorderLayout());
         jPanel.setOpaque(false);
         iconPanel = new JPanel(new BorderLayout());
-        JPanel icon = new ImagePanel(iconURL, FILE_ICON_WIDTH - 6, FILE_ICON_HEIGHT - 6);
-        icon.setOpaque(false);
-        iconPanel.add(icon, BorderLayout.CENTER);
         iconPanel.setOpaque(false);
         fileNameLabel = new JLabel(fileName);
         fileNameLabel.setFont(Constants.FILE_NAME_FONT);
@@ -61,6 +52,22 @@ public class FileIconView extends MouseAdapter {
         fileNameMenuItem.setForeground(Constants.FILE_NAME_POPUP_FOREGROUND);
         fileNameMenuItem.setFont(Constants.FILE_NAME_POPUP_FONT);
         fileNamePopup.add(fileNameMenuItem);
+        updateIcon();
+    }
+
+    public void updateIcon() {
+        iconPanel.removeAll();
+        URL iconURL;
+        if (directory) {
+            iconURL = IconManager.getDirectoryIconURL();
+        } else {
+            iconURL = IconManager.getFileIconURL(fileName);
+        }
+        JPanel icon = new ImagePanel(iconURL, FILE_ICON_WIDTH - 6, FILE_ICON_HEIGHT - 6);
+        icon.setOpaque(false);
+        iconPanel.add(icon, BorderLayout.CENTER);
+        iconPanel.validate();
+        iconPanel.repaint();
     }
 
     public JPanel getDisplayableComponent() {
