@@ -139,8 +139,8 @@ public class KeyManager implements KeyViewListener {
         gbc.gridy++;
         JPanel buttonContainer = new JPanel(new FlowLayout(FlowLayout.CENTER, 50, 50));
         buttonContainer.setOpaque(false);
-        JButton no = getButton("Cancel", CONFIRM_BUTTON_BACKGROUND, CONFIRM_BUTTON_FOREGROUND, CONFIRM_BUTTON_FONT, _ -> addOrEditKeyDialog.setVisible(false));
-        JButton yes = getButton("Save", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> addOrEditConfirmButtonPressed());
+        JButton no = getButton("Cancel", UNSAFE_BUTTON_BACKGROUND, UNSAFE_BUTTON_FOREGROUND, UNSAFE_BUTTON_FONT, _ -> addOrEditKeyDialog.setVisible(false));
+        JButton yes = getButton("Save", SAFE_BUTTON_BACKGROUND, SAFE_BUTTON_FOREGROUND, SAFE_BUTTON_FONT, _ -> addOrEditConfirmButtonPressed());
         buttonContainer.add(no);
         buttonContainer.add(yes);
         jPanel.add(buttonContainer, gbc);
@@ -167,8 +167,8 @@ public class KeyManager implements KeyViewListener {
         gbc.gridy++;
         JPanel buttonContainer = new JPanel(new FlowLayout(FlowLayout.CENTER, 50, 50));
         buttonContainer.setOpaque(false);
-        JButton no = getButton("Cancel", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> deleteKeyDialog.setVisible(false));
-        JButton yes = getButton("Delete", CONFIRM_BUTTON_BACKGROUND, CONFIRM_BUTTON_FOREGROUND, CONFIRM_BUTTON_FONT, _ -> deleteConfirmButtonPressed());
+        JButton no = getButton("Cancel", SAFE_BUTTON_BACKGROUND, SAFE_BUTTON_FOREGROUND, SAFE_BUTTON_FONT, _ -> deleteKeyDialog.setVisible(false));
+        JButton yes = getButton("Delete", UNSAFE_BUTTON_BACKGROUND, UNSAFE_BUTTON_FOREGROUND, UNSAFE_BUTTON_FONT, _ -> deleteConfirmButtonPressed());
         buttonContainer.add(no);
         buttonContainer.add(yes);
         jPanel.add(buttonContainer, gbc);

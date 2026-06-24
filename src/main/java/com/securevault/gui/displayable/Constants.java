@@ -6,15 +6,15 @@ import java.awt.*;
 
 public class Constants {
     public static final char PASSWORD_ECHO_CHAR = '•';
-    public static final String LOGIN_PAGE_BACKGROUND_IMAGE = "background_images/background.jpg";
+    public static final String LOGIN_PAGE_BACKGROUND_IMAGE = "background_images/login.jpg";
     public static final String VAULT_PATH_LABEL_MESSAGE = "<html>Enter the vault path:</html>";
     public static final String VAULT_PATH_LABEL_ERROR_MESSAGE = "<html>Enter the vault path: (Invalid path)</html>";
     public static final String VAULT_PASSWORD_LABEL_MESSAGE = "<html>Enter the vault password:</html>";
     public static final String VAULT_PASSWORD_LABEL_INVALID_MESSAGE = "<html>Enter the vault password: (Password must me at least 5 characters long)</html>";
     public static final String VAULT_CREATE_CHECKBOX_LABEL_MESSAGE = "<html>You want to create the vault?</html>";
     public static final Color LOGIN_PAGE_LABEL_FOREGROUND = Color.CYAN;
-    public static final String FILES_VIEW_BACKGROUND_IMAGE = "background_images/background.jpg";
-    public static final String KEYS_VIEW_BACKGROUND_IMAGE = "background_images/background.jpg";
+    public static final String FILES_VIEW_BACKGROUND_IMAGE = "background_images/files_view.jpg";
+    public static final String KEYS_VIEW_BACKGROUND_IMAGE = "background_images/keys_view.jpg";
     public static final int BACK_BUTTON_WIDTH = 50;
     public static final int BACK_BUTTON_HEIGHT = 50;
     public static final String BACK_BUTTON_ICON = "other_icons/back_button.png";
@@ -31,12 +31,12 @@ public class Constants {
     public static final Font SETTING_SUBMENU_DIALOG_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
     public static final int CONFIRM_AND_CANCEL_BUTTON_WIDTH = 100;
     public static final int CONFIRM_AND_CANCEL_BUTTON_HEIGHT = 40;
-    public static final Color CONFIRM_BUTTON_BACKGROUND = Color.RED.brighter();
-    public static final Color CONFIRM_BUTTON_FOREGROUND = Color.BLACK;
-    public static final Font CONFIRM_BUTTON_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
-    public static final Color CANCEL_BUTTON_BACKGROUND = Color.GREEN.brighter();
-    public static final Color CANCEL_BUTTON_FOREGROUND = Color.BLACK;
-    public static final Font CANCEL_BUTTON_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
+    public static final Color UNSAFE_BUTTON_BACKGROUND = Color.RED.brighter();
+    public static final Color UNSAFE_BUTTON_FOREGROUND = Color.BLACK;
+    public static final Font UNSAFE_BUTTON_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
+    public static final Color SAFE_BUTTON_BACKGROUND = Color.GREEN.brighter();
+    public static final Color SAFE_BUTTON_FOREGROUND = Color.BLACK;
+    public static final Font SAFE_BUTTON_FONT = new Font(Font.DIALOG, Font.BOLD, 13);
     public static final int ICON_WIDTH = 65;
     public static final int ICON_HEIGHT = 85;
     public static final int WIDTH = 900;

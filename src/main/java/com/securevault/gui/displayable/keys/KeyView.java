@@ -4,6 +4,7 @@ import com.securevault.gui.displayable.keys.listeners.KeyViewListener;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -11,6 +12,7 @@ import java.awt.event.MouseEvent;
 import static com.securevault.gui.displayable.Constants.*;
 
 public class KeyView extends MouseAdapter {
+    private static final Toolkit TOOLKIT = Toolkit.getDefaultToolkit();
     private static final String HIDDEN_PASSWORD_TEXT = ("" + PASSWORD_ECHO_CHAR).repeat(6);
     private final WebsiteIdPair websiteIdPair;
     private final KeyViewListener keyViewListener;
@@ -87,6 +89,10 @@ public class KeyView extends MouseAdapter {
     }
 
     private void copyButtonPressed() {
+        try {
+            TOOLKIT.getSystemClipboard().setContents(new StringSelection(keyViewListener.getValue(websiteIdPair)), null);
+        } catch (Exception _) {
+        }
     }
 
     public void setBorder() {

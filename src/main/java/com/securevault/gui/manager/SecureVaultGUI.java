@@ -100,7 +100,7 @@ public class SecureVaultGUI implements WindowListener {
         vaultPathField.setForeground(Constants.TEXT_FIELD_FOREGROUND);
         vaultPathField.setPreferredSize(new Dimension(50, 30));
         vaultPathField.setFont(Constants.TEXT_FIELD_FONT);
-        JButton choosePathButton = getButton("Choose", Color.GREEN, Color.BLACK, Constants.CONFIRM_BUTTON_FONT, _ -> {
+        JButton choosePathButton = getButton("Choose", Color.GREEN, Color.BLACK, Constants.UNSAFE_BUTTON_FONT, _ -> {
             if (fileChooser.showOpenDialog(loginPanel) == JFileChooser.APPROVE_OPTION) {
                 File selectedFile = fileChooser.getSelectedFile();
                 if (selectedFile != null) {
@@ -175,7 +175,7 @@ public class SecureVaultGUI implements WindowListener {
             } catch (Exception _) {
             }
         };
-        JButton proceed = getButton(create.isSelected() ? "Create" : "Open", Constants.CANCEL_BUTTON_BACKGROUND, Constants.CANCEL_BUTTON_FOREGROUND, Constants.CANCEL_BUTTON_FONT, proceedButtonListener);
+        JButton proceed = getButton(create.isSelected() ? "Create" : "Open", Constants.SAFE_BUTTON_BACKGROUND, Constants.SAFE_BUTTON_FOREGROUND, Constants.SAFE_BUTTON_FONT, proceedButtonListener);
         create.addActionListener(_ -> {
             if (create.isSelected()) {
                 proceed.setText("Create");
@@ -188,9 +188,9 @@ public class SecureVaultGUI implements WindowListener {
         loginPanel.add(container);
     }
 
-    private JDialog getJDialog(String name, int width, int height, int closeOperation) {
+    private JDialog getJDialog(String name, int closeOperation) {
         JDialog jDialog = new JDialog(jFrame, name, true);
-        jDialog.setSize(new Dimension(width, height));
+        jDialog.setSize(new Dimension(Constants.SETTING_SUBMENU_DIALOG_WIDTH, Constants.SETTING_SUBMENU_DIALOG_HEIGHT));
         jDialog.setLocationRelativeTo(jFrame);
         jDialog.setResizable(false);
         jDialog.setDefaultCloseOperation(closeOperation);
@@ -198,7 +198,7 @@ public class SecureVaultGUI implements WindowListener {
     }
 
     private void initOptionDialog() {
-        optionDialog = getJDialog("Option", Constants.SETTING_SUBMENU_DIALOG_WIDTH, Constants.SETTING_SUBMENU_DIALOG_HEIGHT, JDialog.DO_NOTHING_ON_CLOSE);
+        optionDialog = getJDialog("Option", JDialog.DO_NOTHING_ON_CLOSE);
         optionDialog.setVisible(false);
         JPanel jPanel = new JPanel(new GridLayout(0, 1));
         jPanel.setBackground(Constants.SETTING_SUBMENU_DIALOG_BACKGROUND);
@@ -224,21 +224,21 @@ public class SecureVaultGUI implements WindowListener {
             optionDialog.setVisible(false);
             dialogLock.release();
         };
-        optionDialogButton = getButton("Proceed", Constants.CANCEL_BUTTON_BACKGROUND, Constants.CANCEL_BUTTON_FOREGROUND, Constants.CANCEL_BUTTON_FONT, actionListener);
+        optionDialogButton = getButton("Proceed", Constants.SAFE_BUTTON_BACKGROUND, Constants.SAFE_BUTTON_FOREGROUND, Constants.SAFE_BUTTON_FONT, actionListener);
         container.add(optionDialogButton);
         jPanel.add(container);
         optionDialog.setContentPane(jPanel);
     }
 
     private void initErrorDialog() {
-        errorDialog = getJDialog("Error", Constants.SETTING_SUBMENU_DIALOG_WIDTH, Constants.SETTING_SUBMENU_DIALOG_HEIGHT, JDialog.DO_NOTHING_ON_CLOSE);
+        errorDialog = getJDialog("Error", JDialog.HIDE_ON_CLOSE);
         JPanel jPanel = new JPanel(new GridLayout(0, 1));
         jPanel.setBackground(Constants.SETTING_SUBMENU_DIALOG_BACKGROUND);
         errorDialogLabel = getLabel("", Constants.SETTING_SUBMENU_DIALOG_FOREGROUND);
         jPanel.add(errorDialogLabel);
         JPanel container = new JPanel(new FlowLayout(FlowLayout.CENTER));
         container.setOpaque(false);
-        JButton jButton = getButton("Ok", Constants.CANCEL_BUTTON_BACKGROUND, Constants.CANCEL_BUTTON_FOREGROUND, Constants.CANCEL_BUTTON_FONT, _ -> {
+        JButton jButton = getButton("Ok", Constants.SAFE_BUTTON_BACKGROUND, Constants.SAFE_BUTTON_FOREGROUND, Constants.SAFE_BUTTON_FONT, _ -> {
             errorDialog.setVisible(false);
             dialogLock.release();
         });

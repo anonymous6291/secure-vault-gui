@@ -68,9 +68,6 @@ public class DirectoryViewManager implements DirectoryViewListener {
         displayPanel.setLayout(new BorderLayout());
         fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Choose files to add");
-        fileChooser.setApproveButtonText("Add");
-        fileChooser.setMultiSelectionEnabled(true);
-        fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         initRenameFileDialog();
         initDeleteFileDialog();
         initSettingPopupMenu();
@@ -131,9 +128,9 @@ public class DirectoryViewManager implements DirectoryViewListener {
         gbc.gridy++;
         JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER, 50, 0));
         buttons.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
-        JButton no = getButton("Cancel", CONFIRM_BUTTON_BACKGROUND, CONFIRM_BUTTON_FOREGROUND, CONFIRM_BUTTON_FONT, _ -> renameFileDialog.setVisible(false));
+        JButton no = getButton("Cancel", UNSAFE_BUTTON_BACKGROUND, UNSAFE_BUTTON_FOREGROUND, UNSAFE_BUTTON_FONT, _ -> renameFileDialog.setVisible(false));
         buttons.add(no);
-        JButton yes = getButton("Rename", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> renameButtonTriggered());
+        JButton yes = getButton("Rename", SAFE_BUTTON_BACKGROUND, SAFE_BUTTON_FOREGROUND, SAFE_BUTTON_FONT, _ -> renameButtonTriggered());
         buttons.add(yes);
         jPanel.add(buttons, gbc);
         renameFileDialog.setContentPane(jPanel);
@@ -153,8 +150,8 @@ public class DirectoryViewManager implements DirectoryViewListener {
         jPanel.add(container);
         container = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 10));
         container.setOpaque(false);
-        JButton no = getButton("No", CONFIRM_BUTTON_BACKGROUND, CONFIRM_BUTTON_FOREGROUND, CONFIRM_BUTTON_FONT, _ -> deleteFileDialog.setVisible(false));
-        JButton yes = getButton("Yes", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> {
+        JButton no = getButton("No", UNSAFE_BUTTON_BACKGROUND, UNSAFE_BUTTON_FOREGROUND, UNSAFE_BUTTON_FONT, _ -> deleteFileDialog.setVisible(false));
+        JButton yes = getButton("Yes", SAFE_BUTTON_BACKGROUND, SAFE_BUTTON_FOREGROUND, SAFE_BUTTON_FONT, _ -> {
             deleteFileDialog.setVisible(false);
             try {
                 Path filePath = Path.of(deleteFilePath.getText());
@@ -291,10 +288,10 @@ public class DirectoryViewManager implements DirectoryViewListener {
         jPanel.add(jLabel, gbc);
         gbc.gridy++;
         gbc.gridwidth = 1;
-        JButton no = getButton("No, don't", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> closeVaultDialog.setVisible(false));
+        JButton no = getButton("No, don't", SAFE_BUTTON_BACKGROUND, SAFE_BUTTON_FOREGROUND, SAFE_BUTTON_FONT, _ -> closeVaultDialog.setVisible(false));
         jPanel.add(no, gbc);
         gbc.gridx++;
-        JButton yes = getButton("Yes, close", CONFIRM_BUTTON_BACKGROUND, CONFIRM_BUTTON_FOREGROUND, CONFIRM_BUTTON_FONT, _ -> closeVault());
+        JButton yes = getButton("Yes, close", UNSAFE_BUTTON_BACKGROUND, UNSAFE_BUTTON_FOREGROUND, UNSAFE_BUTTON_FONT, _ -> closeVault());
         jPanel.add(yes, gbc);
         closeVaultDialog.setContentPane(jPanel);
         closeVaultDialog.validate();
@@ -307,7 +304,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
         logPanel.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
         JPanel container = new JPanel(new FlowLayout(FlowLayout.CENTER));
         container.setOpaque(false);
-        JButton clear = getButton("Clear", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> {
+        JButton clear = getButton("Clear", SAFE_BUTTON_BACKGROUND, SAFE_BUTTON_FOREGROUND, SAFE_BUTTON_FONT, _ -> {
             directoryViewManagerListener.clearLogs();
             logDialog.setVisible(false);
         });
@@ -366,10 +363,10 @@ public class DirectoryViewManager implements DirectoryViewListener {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.weightx = 1;
-        JButton no = getButton("Cancel", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> lockdownVaultDialog.setVisible(false));
+        JButton no = getButton("Cancel", SAFE_BUTTON_BACKGROUND, SAFE_BUTTON_FOREGROUND, SAFE_BUTTON_FONT, _ -> lockdownVaultDialog.setVisible(false));
         buttonContainer.add(no, gridBagConstraints);
         gridBagConstraints.gridx++;
-        JButton yes = getButton("Lockdown", CONFIRM_BUTTON_BACKGROUND, CONFIRM_BUTTON_FOREGROUND, CONFIRM_BUTTON_FONT, _ -> lockdownVault());
+        JButton yes = getButton("Lockdown", UNSAFE_BUTTON_BACKGROUND, UNSAFE_BUTTON_FOREGROUND, UNSAFE_BUTTON_FONT, _ -> lockdownVault());
         buttonContainer.add(yes, gridBagConstraints);
         jPanel.add(buttonContainer, gbc);
         lockdownVaultDialog.setContentPane(jPanel);
@@ -445,8 +442,8 @@ public class DirectoryViewManager implements DirectoryViewListener {
         gridBagConstraints.gridy++;
         container = new JPanel(new FlowLayout(FlowLayout.CENTER));
         container.setOpaque(false);
-        JButton cancel = getButton("Cancel", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> changePasswordDialog.setVisible(false));
-        JButton change = getButton("Change", CONFIRM_BUTTON_BACKGROUND, CONFIRM_BUTTON_FOREGROUND, CONFIRM_BUTTON_FONT, _ -> changeVaultPassword());
+        JButton cancel = getButton("Cancel", SAFE_BUTTON_BACKGROUND, SAFE_BUTTON_FOREGROUND, SAFE_BUTTON_FONT, _ -> changePasswordDialog.setVisible(false));
+        JButton change = getButton("Change", UNSAFE_BUTTON_BACKGROUND, UNSAFE_BUTTON_FOREGROUND, UNSAFE_BUTTON_FONT, _ -> changeVaultPassword());
         container.add(cancel);
         container.add(change);
         jPanel.add(container, gridBagConstraints);
@@ -487,10 +484,10 @@ public class DirectoryViewManager implements DirectoryViewListener {
         gridBagConstraints.gridx = 0;
         gridBagConstraints.gridy = 0;
         gridBagConstraints.weightx = 1;
-        JButton no = getButton("Cancel", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> destroyVaultDialog.setVisible(false));
+        JButton no = getButton("Cancel", SAFE_BUTTON_BACKGROUND, SAFE_BUTTON_FOREGROUND, SAFE_BUTTON_FONT, _ -> destroyVaultDialog.setVisible(false));
         buttonContainer.add(no, gridBagConstraints);
         gridBagConstraints.gridx++;
-        JButton yes = getButton("Destroy", CONFIRM_BUTTON_BACKGROUND, CONFIRM_BUTTON_FOREGROUND, CONFIRM_BUTTON_FONT, _ -> destroyVault());
+        JButton yes = getButton("Destroy", UNSAFE_BUTTON_BACKGROUND, UNSAFE_BUTTON_FOREGROUND, UNSAFE_BUTTON_FONT, _ -> destroyVault());
         buttonContainer.add(yes, gridBagConstraints);
         jPanel.add(buttonContainer, gbc);
         destroyVaultDialog.setContentPane(jPanel);
@@ -532,9 +529,9 @@ public class DirectoryViewManager implements DirectoryViewListener {
         gridBagConstraints.gridy++;
         JPanel buttonContainer = new JPanel(new FlowLayout(FlowLayout.CENTER, 50, 1));
         buttonContainer.setBackground(SETTING_SUBMENU_DIALOG_BACKGROUND);
-        JButton cancel = getButton("Cancel", CONFIRM_BUTTON_BACKGROUND, CONFIRM_BUTTON_FOREGROUND, CONFIRM_BUTTON_FONT, _ -> selfDestructStatusDialog.setVisible(false));
+        JButton cancel = getButton("Cancel", UNSAFE_BUTTON_BACKGROUND, UNSAFE_BUTTON_FOREGROUND, UNSAFE_BUTTON_FONT, _ -> selfDestructStatusDialog.setVisible(false));
         buttonContainer.add(cancel);
-        JButton save = getButton("Save", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> handleSelfDestructSelection());
+        JButton save = getButton("Save", SAFE_BUTTON_BACKGROUND, SAFE_BUTTON_FOREGROUND, SAFE_BUTTON_FONT, _ -> handleSelfDestructSelection());
         buttonContainer.add(save);
         jPanel.add(buttonContainer, gridBagConstraints);
         selfDestructStatusDialog.setContentPane(jPanel);
@@ -788,6 +785,9 @@ public class DirectoryViewManager implements DirectoryViewListener {
         switch (action) {
             case ADD -> {
                 try {
+                    fileChooser.setApproveButtonText("Add");
+                    fileChooser.setMultiSelectionEnabled(true);
+                    fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
                     fileChooser.setSelectedFile(null);
                     if (fileChooser.showDialog(displayPanel, null) == JFileChooser.APPROVE_OPTION) {
                         File[] selectedFiles = fileChooser.getSelectedFiles();
@@ -799,7 +799,22 @@ public class DirectoryViewManager implements DirectoryViewListener {
                     IO.println(e);
                 }
             }
-            case RETRIEVE -> directoryViewManagerListener.retrieveFileFromVault(filePath, Path.of(""));
+            case RETRIEVE -> {
+                try {
+                    fileChooser.setApproveButtonText("Retrieve");
+                    fileChooser.setMultiSelectionEnabled(false);
+                    fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+                    fileChooser.setSelectedFile(null);
+                    if (fileChooser.showDialog(displayPanel, null) == JFileChooser.APPROVE_OPTION) {
+                        File file = fileChooser.getSelectedFile();
+                        if (file != null && file.isDirectory()) {
+                            directoryViewManagerListener.retrieveFileFromVault(filePath, file.toPath());
+                        }
+                    }
+                } catch (Exception e) {
+                    IO.println(e);
+                }
+            }
             case DELETE -> {
                 deleteFilePath.setText(filePath.toString());
                 JDialogDisplayer.makeVisible(deleteFileDialog);
@@ -877,8 +892,8 @@ public class DirectoryViewManager implements DirectoryViewListener {
             abortPanel.add(jLabel);
             JPanel container = new JPanel(new FlowLayout(FlowLayout.CENTER, 40, 50));
             container.setOpaque(false);
-            JButton no = getButton("No, don't", CANCEL_BUTTON_BACKGROUND, CANCEL_BUTTON_FOREGROUND, CANCEL_BUTTON_FONT, _ -> abortDialog.setVisible(false));
-            JButton yes = getButton("Yes, abort", CONFIRM_BUTTON_BACKGROUND, CONFIRM_BUTTON_FOREGROUND, CONFIRM_BUTTON_FONT, _ -> {
+            JButton no = getButton("No, don't", SAFE_BUTTON_BACKGROUND, SAFE_BUTTON_FOREGROUND, SAFE_BUTTON_FONT, _ -> abortDialog.setVisible(false));
+            JButton yes = getButton("Yes, abort", UNSAFE_BUTTON_BACKGROUND, UNSAFE_BUTTON_FOREGROUND, UNSAFE_BUTTON_FONT, _ -> {
                 abortDialog.setVisible(false);
                 directoryViewManagerListener.abortAllFileTransfers();
             });
