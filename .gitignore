@@ -1,5 +1,5 @@
 target/
-!secure-vault-core-1.0-SNAPSHOT
+./secure-vault-core-1.0-SNAPSHOT
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/
@@ -38,3 +38,4 @@ build/
 
 ### Mac OS ###
 .DS_Store
+/secure-vault-core-1.0-SNAPSHOT
