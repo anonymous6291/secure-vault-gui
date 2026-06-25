@@ -200,19 +200,19 @@ Add screenshots of the application here.
 ### Main Window
 
 <p align="center">
-    <img src="assets/login_view.png" width="900"/>
+    <img src="assets/login_view.png" width="950"/>
 </p>
 
 ### Vault Management
 
 <p align="center">
-    <img src="assets/directory_view.png" width="900"/>
+    <img src="assets/directory_view.png" width="950"/>
 </p>
 
 ### Password Manager
 
 <p align="center">
-    <img src="assets/password_view.png" width="900"/>
+    <img src="assets/password_view.png" width="950"/>
 </p>
 
 ---
