@@ -66,6 +66,7 @@ public class DirectoryViewManager implements DirectoryViewListener {
         rootDirectoryView = currentDirectoryView = new DirectoryView("", null, this);
         displayPanel = new ImagePanel(ResourceManager.getResource(FILES_VIEW_BACKGROUND_IMAGE), displaySize.width, displaySize.height);
         displayPanel.setLayout(new BorderLayout());
+        displayPanel.setDoubleBuffered(true);
         fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Choose files to add");
         initRenameFileDialog();

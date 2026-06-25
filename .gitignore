@@ -40,3 +40,6 @@ build/
 ### Mac OS ###
 .DS_Store
 /secure-vault-core-1.0-SNAPSHOT
+/SecureVaultGUI/
+/package.sh
+/SecureVault

@@ -45,8 +45,9 @@ public class KeyManager implements KeyViewListener {
         this.windowFrame = windowFrame;
         this.keyManagerListener = keyManagerListener;
         this.keyType = keyType;
-        this.displayPanel = new ImagePanel(ResourceManager.getResource(KEYS_VIEW_BACKGROUND_IMAGE), dimension.width, dimension.height);
+        displayPanel = new ImagePanel(ResourceManager.getResource(KEYS_VIEW_BACKGROUND_IMAGE), dimension.width, dimension.height);
         displayPanel.setLayout(new BorderLayout());
+        displayPanel.setDoubleBuffered(true);
         addPopupMenu = new JPopupMenu();
         addPopupMenu.add(getMenuItem("Add Key", _ -> displayAddKeyDialog()));
         allPopupMenu = new JPopupMenu();
@@ -220,10 +221,6 @@ public class KeyManager implements KeyViewListener {
         setLock();
         try {
             JPanel jPanel = new JPanel(new WrapLayout(WrapLayout.LEFT, 20, 20));
-            JScrollPane jScrollPane = new JScrollPane(jPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-            jScrollPane.getVerticalScrollBar().setUnitIncrement(20);
-            jScrollPane.setOpaque(false);
-            jScrollPane.getViewport().setOpaque(false);
             jPanel.setOpaque(false);
             jPanel.addMouseListener(new MouseAdapter() {
                 @Override
@@ -234,8 +231,13 @@ public class KeyManager implements KeyViewListener {
                 }
             });
             keyViewMap.values().forEach(x -> jPanel.add(x.getView()));
+            jPanel.validate();
+            jPanel.repaint();
+            JScrollPane jScrollPane = new JScrollPane(jPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+            jScrollPane.getVerticalScrollBar().setUnitIncrement(20);
+            jScrollPane.setOpaque(false);
+            jScrollPane.getViewport().setOpaque(false);
             displayPanel.removeAll();
-            displayPanel.validate();
             displayPanel.add(jScrollPane, BorderLayout.CENTER);
             displayPanel.validate();
             displayPanel.repaint();

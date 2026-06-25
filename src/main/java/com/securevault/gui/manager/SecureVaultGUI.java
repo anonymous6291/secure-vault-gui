@@ -6,6 +6,7 @@ import com.securevault.gui.displayable.JDialogDisplayer;
 import com.securevault.gui.displayable.directory.DirectoryViewManager;
 import com.securevault.gui.displayable.keys.KeyManager;
 import com.securevault.gui.displayable.keys.KeyType;
+import com.securevault.gui.manager.listeners.SecureVaultGUIListener;
 import com.securevault.gui.resource.ResourceManager;
 
 import javax.swing.*;
