@@ -221,17 +221,42 @@ Add screenshots of the application here.
 
 * Java 25
 * Maven
+* SecureVault (secure-vault-core)
 
 ---
 
 ## 🏗️ Building
 
-Clone the repository:
+* Clone the repository:
 
 ```bash id="s62tua"
 git clone https://github.com/anonymous6291/secure-vault-gui.git
 cd secure-vault-gui
 ```
+
+* Make the jar file:
+
+```text
+mvn clean package
+```
+
+* Download SecureVault:
+
+> Linux
+> ```bash
+> wget https://github.com/anonymous6291/secure-vault-core/raw/main/release/linux/SecureVault_V1.0.0 -O SecureVault
+> ```
+
+> Windows
+> ```cmd
+> wget https://github.com/anonymous6291/secure-vault-core/raw/main/release/windows/SecureVault_V1.0.0.exe -O SecureVault.exe
+> ```
+
+* Run
+```text
+java -jar ./target/secure-vault-gui-1.0-SNAPSHOT.jar
+```
+
 
 ---
 
