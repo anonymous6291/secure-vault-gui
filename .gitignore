@@ -42,3 +42,4 @@ build/
 /SecureVaultGUI/
 /package.sh
 /SecureVault
+/run.sh
