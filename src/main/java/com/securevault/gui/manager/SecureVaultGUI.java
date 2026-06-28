@@ -263,10 +263,12 @@ public class SecureVaultGUI implements WindowListener {
         passwordManager.addKeysToView(secureVaultGUIListener.getKeysList(KeyType.PASSWORD));
         apiKeyManager.addKeysToView(secureVaultGUIListener.getKeysList(KeyType.API_KEY));
         jFrame.setContentPane(vaultViewPanel);
+        jFrame.setTitle("SecureVault " + secureVaultGUIListener.getVersion());
     }
 
     public void showLoginPage() {
         jFrame.setContentPane(loginPanel);
+        jFrame.setTitle("SecureVault");
     }
 
     public String askForQuery(String query, List<String> options) {

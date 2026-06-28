@@ -1,4 +1,4 @@
-# 🖥️ SecureVault GUI
+# 🖥️ SecureVault GUI 2.0.0
 
 SecureVault GUI is a desktop application built with Java Swing that provides a user-friendly graphical interface for managing encrypted vaults. It offers all the security capabilities of SecureVault while making vault management accessible through an intuitive desktop experience.
 
