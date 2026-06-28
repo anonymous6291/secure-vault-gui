@@ -220,8 +220,8 @@ Add screenshots of the application here.
 ## 📋 Requirements
 
 * Java 25
-* Maven
 * SecureVault (secure-vault-core)
+* Maven
 
 ---
 
@@ -244,17 +244,17 @@ mvn clean package
 
 > Linux
 > ```bash
-> wget https://github.com/anonymous6291/secure-vault-core/raw/main/release/linux/SecureVault_V1.0.0 -O SecureVault
+> wget https://github.com/anonymous6291/secure-vault-core/raw/main/release/linux/SecureVault_V2.0.0 -O SecureVault
 > ```
 
 > Windows
 > ```cmd
-> wget https://github.com/anonymous6291/secure-vault-core/raw/main/release/windows/SecureVault_V1.0.0.exe -O SecureVault.exe
+> wget https://github.com/anonymous6291/secure-vault-core/raw/main/release/windows/SecureVault_V2.0.0.exe -O SecureVault.exe
 > ```
 
 * Run
 ```text
-java -jar ./target/secure-vault-gui-1.0-SNAPSHOT.jar
+java -jar ./target/secure-vault-gui-2.0.0.jar
 ```
 
 
